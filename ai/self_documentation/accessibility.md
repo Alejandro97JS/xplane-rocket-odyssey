@@ -9,7 +9,7 @@ The target is WCAG 2.1 AA. This document records what was done to meet it, what 
 | The canvas must never be the only carrier of information | Next to the canvas there is a telemetry panel with the mission clock, phase, altitude, speed and propellant of both stages as text. Mission events are written to a log region, which screen readers announce. The result and its explanation are ordinary text in the debrief. The canvas is labelled as an image that points to those. |
 | Reduced motion | When the system asks for less motion, the launch is shown as a list of steps with the telemetry at each one, and entrance animations are switched off. The player can still ask for the animation with one button. |
 | Pause, stop, hide (2.2.2) | The launch has Pause, Restart and Skip. Nothing else on any screen moves for more than five seconds: the backdrop is still. |
-| Audio control (1.4.2) | The launch has sound. A "Mute sound" button next to Pause turns it off, and the choice is remembered. The sound carries no information that is not also in the telemetry and the event log. Pausing the launch silences it. |
+| Audio control (1.4.2) | The launch has sound, and the result is announced with music that plays by itself for more than 3 seconds, on the launch screen or when the debrief opens. One sound setting mutes both, and the choice is remembered. Its button, "Mute sound", is next to Pause on the launch and at the top of the debrief, in the header. The sound and the music carry no information that is not also in the telemetry, the event log and the verdict. Pausing the launch silences it. See [result_music.md](result_music.md). |
 | Flashes (2.3.1) | Nothing flashes. The breakup is one fireball that swells once and fades. The beacon after a hold is steady. |
 | Keyboard (2.1.1) | Every control is reachable and usable with the keyboard. Option cards are real radio buttons and checkboxes: Tab enters a group, arrows move inside it, Space selects. The warning dialog traps focus and closes with Escape. A test plays the whole level with the keyboard alone. |
 | Focus visible (2.4.7) | One focus style everywhere: a white 3-pixel outline with an offset. Controls drawn with cut corners keep the outline on an element that is not clipped. |
@@ -26,6 +26,8 @@ The target is WCAG 2.1 AA. This document records what was done to meet it, what 
 ## What the automated checks cover
 
 `npm run test:e2e` runs axe with the WCAG 2.0 and 2.1 A and AA rules on: the title screen; each of the five steps, empty and filled in; the summary with nothing chosen; the over-budget alert and its dialog; the launch as a list of steps; the animated launch, paused; the debrief after a success and after a failure; the page for an unknown address; and the debrief at 320 pixels. Since 2026-11-14 it also covers free exploration: the payload step with the cost in the header, step 1 with the free exploration card selected, the summary, the debrief, and step 1 at 320 pixels.
+
+Since 2026-11-14 the run also checks that the debrief has its sound button in the header, and that the button mutes the launch too.
 
 The same run plays the level with the keyboard alone, enters free exploration with the keyboard and moves between it and the contracts with the arrow keys, checks the dialog focus trap and checks reflow at 320 pixels on every screen. The decisions about the accessibility of free exploration are in [free_exploration.md](free_exploration.md).
 

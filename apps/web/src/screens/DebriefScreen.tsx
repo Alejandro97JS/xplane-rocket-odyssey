@@ -12,6 +12,7 @@ import {
 import { Navigate, useNavigate } from 'react-router';
 import { useDispatch, useGame, useLaunchResult } from '../app/store.ts';
 import { getStep, type StepId } from '../app/steps.ts';
+import { useResultMusic } from '../audio/useResultMusic.ts';
 import { ActionButton } from '../components/ActionButton.tsx';
 import { AppHeader } from '../components/AppHeader.tsx';
 import { DeltaVChart } from '../components/DeltaVChart.tsx';
@@ -25,6 +26,7 @@ import {
   ReplayIcon,
   StarIcon,
 } from '../components/icons.tsx';
+import { SoundToggle } from '../components/SoundToggle.tsx';
 import { StepPanel } from '../components/StepPanel.tsx';
 import { cx } from '../lib/cx.ts';
 
@@ -53,6 +55,9 @@ const NUMBER_WORDS = ['no', 'one', 'two', 'three', 'four', 'five'];
  * A flight in free exploration has no contract: it gets no score and no
  * record, the flight review lists only the rules of physics, and the cost is
  * shown without a budget.
+ *
+ * The music of the result plays here if the player did not hear it at the
+ * end of the animation, and the sound button is at the top of the page.
  */
 export function DebriefScreen() {
   const navigate = useNavigate();
@@ -60,6 +65,7 @@ export function DebriefScreen() {
   const launch = useGame((state) => state.launch);
   const result = useLaunchResult();
   const record = useGame((state) => (launch?.levelId ? selectRecord(state, launch.levelId) : null));
+  useResultMusic(launch?.sequence, result?.outcome);
   if (!launch || !result) return <Navigate to="/plan/mission" replace />;
 
   const { evaluation, report, score } = result;
@@ -74,7 +80,9 @@ export function DebriefScreen() {
 
   return (
     <>
-      <AppHeader tagline="Mission debrief" />
+      <AppHeader tagline="Mission debrief">
+        <SoundToggle />
+      </AppHeader>
       <main id="main" className="flex-1">
         <StepPanel
           badge={success ? <CheckIcon /> : <CrossIcon />}

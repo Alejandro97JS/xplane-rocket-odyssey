@@ -44,7 +44,8 @@ apps/web/src
   screens/               One file per screen
   components/            Frame, buttons, option cards, stepper, meters, dialog, chart
   art/                   SVG drawings: payloads, orbits, missions, rockets, the Earth
-  launch/                Playback clock and mapping, the PixiJS scene, telemetry, event log, map, step list
+  launch/                Playback clock and mapping, the PixiJS scene, the launch sound, telemetry, event log, map, step list
+  audio/                 The music of the result and the one sound setting of the game
   styles/index.css       Design tokens and the few hand-written component styles
 
 apps/server/src
@@ -72,6 +73,7 @@ e2e/                     Playwright tests: gameplay, keyboard, accessibility
 - The rockets are drawn from data in `art/rocketArt.ts`. The same geometry is drawn as SVG on the rocket cards and with PixiJS in the scene.
 - The telemetry and the map are refreshed about eight times per second; the canvas on every frame.
 - `LaunchAudio` plays the sound, synthesised with the Web Audio API, so there are no audio files. Like the canvas, it depends only on the playback time. The countdown beeps once per mission second, at a higher pitch for the last three, and stops at a hold. From ignition the engines roar while they fire; the roar gets quieter and duller as the air thins and is silent above 100 km, the edge of space, because sound does not travel through a vacuum. A breakup inside the atmosphere is a dull boom. The "Mute sound" button turns it off, and the choice is kept in `localStorage`. The hook is `useLaunchAudio`.
+- When the playback reaches its end, `useLaunchAudio` also starts the music of the result, a fanfare or the "you lost" jingle, which goes on into the debrief. Since 2026-11-14 the "Mute sound" button is the shared `SoundToggle` and mutes the launch and the music together. See [result_music.md](result_music.md).
 
 How the altitude and speed curves are produced: during the climb they follow the delta-v delivered so far, with the share lost to gravity and air removed, so the speed equals the orbital speed exactly at insertion. During a transfer they follow the orbit equation. They are meant to look credible, as the standards ask, not to be a trajectory integration.
 
@@ -79,8 +81,8 @@ How the altitude and speed curves are produced: during the climb they follow the
 
 | Command | What runs | Result on 2026-11-14 |
 | --- | --- | --- |
-| `npm test` | 237 unit tests: tables against the use case, physics, one case per failure and per valid path, every flight ending, the score and the optimal design of each level, free exploration, reducer, serialization, playback mapping, rocket drawings, server. | All pass on 2026-11-14, after free exploration was added. |
-| `npm run test:e2e` | 25 Playwright tests in Chrome against the production build: gameplay, free exploration, keyboard only, reduced motion, axe on every screen, reflow at 320 pixels. | All pass on 2026-11-14, after free exploration was added. |
+| `npm test` | 241 unit tests: tables against the use case, physics, one case per failure and per valid path, every flight ending, the score and the optimal design of each level, free exploration, reducer, serialization, playback mapping, rocket drawings, the scores of the result music, server. | All pass on 2026-11-14, after the result music was added. |
+| `npm run test:e2e` | 28 Playwright tests in Chrome against the production build: gameplay, free exploration, keyboard only, reduced motion, axe on every screen, reflow at 320 pixels, the result music and the sound button. | All pass on 2026-11-14, after the result music was added. |
 | `npm run typecheck` | TypeScript strict in the three packages and the end-to-end tests. | No errors. |
 | `npm run lint` | ESLint with `typescript-eslint`, `jsx-a11y` and the rules of hooks. | No errors. |
 

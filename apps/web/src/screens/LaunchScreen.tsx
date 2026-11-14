@@ -18,9 +18,8 @@ import {
   ReplayIcon,
   RocketIcon,
   SkipIcon,
-  SoundOffIcon,
-  SoundOnIcon,
 } from '../components/icons.tsx';
+import { SoundToggle } from '../components/SoundToggle.tsx';
 import { StepPanel } from '../components/StepPanel.tsx';
 import { EventLog, TONE_CLASS, TONE_ICON } from '../launch/EventLog.tsx';
 import { LaunchCanvas } from '../launch/LaunchCanvas.tsx';
@@ -46,10 +45,10 @@ export function LaunchScreen() {
   const result = useLaunchResult();
   if (!launch || !result) return <Navigate to="/plan/mission" replace />;
   // A new launch gets a new view, so nothing of the previous flight is left over.
-  return <LaunchView key={launch.sequence} result={result} />;
+  return <LaunchView key={launch.sequence} result={result} launch={launch.sequence} />;
 }
 
-function LaunchView({ result }: { result: SimulationResult }) {
+function LaunchView({ result, launch }: { result: SimulationResult; launch: number }) {
   const reducedMotion = usePrefersReducedMotion();
   // The player may ask for the animation even when the system prefers less motion.
   const [animationRequested, setAnimationRequested] = useState(false);
@@ -70,7 +69,12 @@ function LaunchView({ result }: { result: SimulationResult }) {
           subtitle={`${rocket.shortName} carries the ${formatList(payloads.map((p) => lowerFirst(p.shortName)))} to ${lowerFirst(orbit.shortName)}.`}
         >
           {animated ? (
-            <AnimatedLaunch result={result} playback={playback} onUnavailable={onUnavailable} />
+            <AnimatedLaunch
+              result={result}
+              launch={launch}
+              playback={playback}
+              onUnavailable={onUnavailable}
+            />
           ) : (
             <StaticLaunch
               result={result}
@@ -86,13 +90,15 @@ function LaunchView({ result }: { result: SimulationResult }) {
 
 interface AnimatedLaunchProps {
   result: SimulationResult;
+  /** The sequence number of the launch, so its result music plays only once. */
+  launch: number;
   playback: Playback;
   onUnavailable: () => void;
 }
 
-function AnimatedLaunch({ result, playback, onUnavailable }: AnimatedLaunchProps) {
+function AnimatedLaunch({ result, launch, playback, onUnavailable }: AnimatedLaunchProps) {
   const { clock, seconds, status } = useLaunchPlayback(playback, true);
-  const { muted, toggleMuted } = useLaunchAudio(playback, clock);
+  useLaunchAudio(playback, clock, result.outcome, launch);
   const { flight } = result;
   const t = missionTimeAt(playback, seconds);
   const telemetry = telemetryAt(flight, t);
@@ -156,10 +162,7 @@ function AnimatedLaunch({ result, playback, onUnavailable }: AnimatedLaunchProps
               <ReplayIcon />
               Restart
             </ActionButton>
-            <ActionButton size="small" onPress={toggleMuted}>
-              {muted ? <SoundOffIcon /> : <SoundOnIcon />}
-              {muted ? 'Turn sound on' : 'Mute sound'}
-            </ActionButton>
+            <SoundToggle />
             {!finished && (
               <ActionButton size="small" href="/debrief" className="ml-auto">
                 <SkipIcon />
