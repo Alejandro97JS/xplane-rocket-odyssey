@@ -81,6 +81,8 @@ How the altitude and speed curves are produced: during the climb they follow the
 | `npm run typecheck` | TypeScript strict in the three packages and the end-to-end tests. | No errors. |
 | `npm run lint` | ESLint with `typescript-eslint`, `jsx-a11y` and the rules of hooks. | No errors. |
 
+The tests that try every design evaluate more than 100,000 designs each and take about 7 seconds on the development machine, more than the default limit of 5 seconds of Vitest. They have a limit of 60 seconds of their own.
+
 ## Not verified, and what is left
 
 - **The Docker image has not been built.** Docker Desktop was not running on the development machine. The three stages were reproduced by hand outside Docker, on Windows, from a copy of the committed tree without the files that `.dockerignore` leaves out:

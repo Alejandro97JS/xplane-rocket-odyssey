@@ -440,6 +440,12 @@ describe('evaluateMission', () => {
 });
 
 /** Every design: 4,095 payload sets, 5 orbits, 8 rockets. */
+/**
+ * Tests that try every design evaluate more than 100,000 of them, which takes
+ * several seconds, more than the default limit of 5 seconds on slower machines.
+ */
+const EVERY_DESIGN_TIMEOUT_MS = 60_000;
+
 function* everyDesign(): Generator<CompleteDesign> {
   const ids = PAYLOADS.map((p) => p.id);
   const sets: PayloadId[][] = [];
@@ -459,35 +465,39 @@ function* everyDesign(): Generator<CompleteDesign> {
 
 describe('levels', () => {
   // The rule of ai/standards/use_case_1_score.md.
-  it.each(LEVELS)('level $number can be won, and only its optimal design scores 100', (level) => {
-    let wins = 0;
-    const perfect: CompleteDesign[] = [];
-    // The optimal design found here by brute force, without findOptimalDesign.
-    let cheapest: { design: CompleteDesign; totalUsd: number; reserve: number } | null = null;
-    for (const d of everyDesign()) {
-      const evaluation = evaluateMission(level.id, d);
-      const score = computeScore(evaluation);
-      if (!score) continue;
-      wins++;
-      expect(score.optimal).toBe(score.total === 100);
-      if (score.total === 100) perfect.push(d);
-      const candidate = {
-        design: d,
-        totalUsd: evaluation.budget.totalUsd,
-        reserve: evaluation.deltaV.marginMs / evaluation.deltaV.requiredMs,
-      };
-      if (
-        cheapest === null ||
-        candidate.totalUsd < cheapest.totalUsd ||
-        (candidate.totalUsd === cheapest.totalUsd && candidate.reserve > cheapest.reserve)
-      ) {
-        cheapest = candidate;
+  it.each(LEVELS)(
+    'level $number can be won, and only its optimal design scores 100',
+    (level) => {
+      let wins = 0;
+      const perfect: CompleteDesign[] = [];
+      // The optimal design found here by brute force, without findOptimalDesign.
+      let cheapest: { design: CompleteDesign; totalUsd: number; reserve: number } | null = null;
+      for (const d of everyDesign()) {
+        const evaluation = evaluateMission(level.id, d);
+        const score = computeScore(evaluation);
+        if (!score) continue;
+        wins++;
+        expect(score.optimal).toBe(score.total === 100);
+        if (score.total === 100) perfect.push(d);
+        const candidate = {
+          design: d,
+          totalUsd: evaluation.budget.totalUsd,
+          reserve: evaluation.deltaV.marginMs / evaluation.deltaV.requiredMs,
+        };
+        if (
+          cheapest === null ||
+          candidate.totalUsd < cheapest.totalUsd ||
+          (candidate.totalUsd === cheapest.totalUsd && candidate.reserve > cheapest.reserve)
+        ) {
+          cheapest = candidate;
+        }
       }
-    }
-    expect(wins).toBeGreaterThan(0);
-    expect(perfect).toEqual([cheapest?.design]);
-    expect(findOptimalDesign(level.id)).toEqual(cheapest);
-  });
+      expect(wins).toBeGreaterThan(0);
+      expect(perfect).toEqual([cheapest?.design]);
+      expect(findOptimalDesign(level.id)).toEqual(cheapest);
+    },
+    EVERY_DESIGN_TIMEOUT_MS,
+  );
 
   it.each<[LevelId, PayloadId[], OrbitId, RocketId]>([
     ['first_space_data', ['cubesat'], 'leo', 'electron'],
@@ -499,24 +509,32 @@ describe('levels', () => {
     expect(findOptimalDesign(level)?.design).toEqual(design(payloads, orbit, rocket));
   });
 
-  it('level 1 has exactly one winning design', () => {
-    const wins = [...everyDesign()].filter(
-      (d) => evaluateMission('first_space_data', d).failure === null,
-    );
-    expect(wins).toEqual([{ payloadIds: ['cubesat'], orbitId: 'leo', rocketId: 'electron' }]);
-  });
+  it(
+    'level 1 has exactly one winning design',
+    () => {
+      const wins = [...everyDesign()].filter(
+        (d) => evaluateMission('first_space_data', d).failure === null,
+      );
+      expect(wins).toEqual([{ payloadIds: ['cubesat'], orbitId: 'leo', rocketId: 'electron' }]);
+    },
+    EVERY_DESIGN_TIMEOUT_MS,
+  );
 
-  it('level 3 can be won with different rockets and orbits', () => {
-    const wins = [...everyDesign()].filter(
-      (d) =>
-        d.payloadIds.length === 1 &&
-        evaluateMission('connecting_the_continent', d).failure === null,
-    );
-    expect(new Set(wins.map((d) => d.rocketId))).toEqual(
-      new Set(['falcon9', 'ariane6', 'starship']),
-    );
-    expect(new Set(wins.map((d) => d.orbitId))).toEqual(new Set(['geo', 'heo']));
-  });
+  it(
+    'level 3 can be won with different rockets and orbits',
+    () => {
+      const wins = [...everyDesign()].filter(
+        (d) =>
+          d.payloadIds.length === 1 &&
+          evaluateMission('connecting_the_continent', d).failure === null,
+      );
+      expect(new Set(wins.map((d) => d.rocketId))).toEqual(
+        new Set(['falcon9', 'ariane6', 'starship']),
+      );
+      expect(new Set(wins.map((d) => d.orbitId))).toEqual(new Set(['geo', 'heo']));
+    },
+    EVERY_DESIGN_TIMEOUT_MS,
+  );
 });
 
 describe('computeScore', () => {
