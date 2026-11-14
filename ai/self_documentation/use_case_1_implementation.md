@@ -68,6 +68,7 @@ e2e/                     Playwright tests: gameplay, keyboard, accessibility
 - `LaunchScene` draws each frame as a function of the playback time. It keeps no state of its own apart from the smoke, so pausing, restarting and skipping are safe.
 - The rockets are drawn from data in `art/rocketArt.ts`. The same geometry is drawn as SVG on the rocket cards and with PixiJS in the scene.
 - The telemetry and the map are refreshed about eight times per second; the canvas on every frame.
+- `LaunchAudio` plays the sound, synthesised with the Web Audio API, so there are no audio files. Like the canvas, it depends only on the playback time. The countdown beeps once per mission second, at a higher pitch for the last three, and stops at a hold. From ignition the engines roar while they fire; the roar gets quieter and duller as the air thins and is silent above 100 km, the edge of space, because sound does not travel through a vacuum. A breakup inside the atmosphere is a dull boom. The "Mute sound" button turns it off, and the choice is kept in `localStorage`. The hook is `useLaunchAudio`.
 
 How the altitude and speed curves are produced: during the climb they follow the delta-v delivered so far, with the share lost to gravity and air removed, so the speed equals the orbital speed exactly at insertion. During a transfer they follow the orbit equation. They are meant to look credible, as the standards ask, not to be a trajectory integration.
 

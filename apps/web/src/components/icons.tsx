@@ -139,3 +139,15 @@ export const GaugeIcon = (p: IconProps) => (
     <circle cx="12" cy="14.500" r="1.200" />
   </Icon>
 );
+export const SoundOnIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 9.500h3.500L12 5.500v13l-4.500-4H4v-5z" />
+    <path d="M15.500 9a4 4 0 0 1 0 6M18 6.500a7.500 7.500 0 0 1 0 11" />
+  </Icon>
+);
+export const SoundOffIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 9.500h3.500L12 5.500v13l-4.500-4H4v-5z" />
+    <path d="M16 9.500l5 5M21 9.500l-5 5" />
+  </Icon>
+);
