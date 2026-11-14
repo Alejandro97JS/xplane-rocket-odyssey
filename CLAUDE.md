@@ -1,0 +1,1 @@
+It is mandatory to read ai/standards/standards.md

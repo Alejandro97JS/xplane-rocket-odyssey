@@ -1,0 +1,1 @@
+We want to build an interactive game playable from the browser, solving ai/standards/statement.md. We want to deploy it and make it available via Railway. You can choose the stack you want, the best possible for the case.
