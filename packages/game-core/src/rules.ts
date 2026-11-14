@@ -34,18 +34,20 @@ export interface Check {
 }
 
 export interface Evaluation {
-  readonly level: LevelSpec;
+  /** The contract, or null in free exploration. */
+  readonly level: LevelSpec | null;
   readonly design: CompleteDesign;
   readonly rocket: RocketSpec;
   readonly orbit: OrbitSpec;
   readonly payloads: readonly PayloadSpec[];
   readonly totals: DesignTotals;
+  /** Null in free exploration, which has no budget. */
   readonly budget: {
     readonly maxUsd: number;
     readonly totalUsd: number;
     /** Positive when the mission costs more than the budget. */
     readonly overUsd: number;
-  };
+  } | null;
   readonly mass: {
     readonly payloadKg: number;
     readonly capacityKg: number;
@@ -63,11 +65,15 @@ export interface Evaluation {
     readonly exposedCapsules: readonly PayloadSpec[];
     readonly exposedCrew: number;
   };
+  /** Null in free exploration, which has no contract objective. */
   readonly objective: {
     readonly missingHardware: readonly HardwareRequirement[];
     readonly orbitAccepted: boolean;
-  };
-  /** All five checks, in flight order. */
+  } | null;
+  /**
+   * The checks that apply, in flight order: all five for a contract. Free
+   * exploration has no budget and no objective, so only the three of physics.
+   */
   readonly checks: readonly Check[];
   /** The first check that fails, which decides how the flight ends. */
   readonly failure: FailureCode | null;
@@ -76,19 +82,26 @@ export interface Evaluation {
 /**
  * Applies the deterministic launch rules to a design. The same design always
  * gives the same evaluation.
+ *
+ * `levelId` is the contract, or null in free exploration. Without a contract
+ * the cost of the design is never a problem and there is no objective to
+ * meet: only the payload mass, the delta-v and the radiation are checked.
  */
-export function evaluateMission(levelId: LevelId, design: CompleteDesign): Evaluation {
-  const level = getLevel(levelId);
+export function evaluateMission(levelId: LevelId | null, design: CompleteDesign): Evaluation {
+  const level = levelId === null ? null : getLevel(levelId);
   const rocket = getRocket(design.rocketId);
   const orbit = getOrbit(design.orbitId);
   const payloads = design.payloadIds.map(getPayload);
   const totals = computeTotals(design);
 
-  const budget = {
-    maxUsd: level.maxBudgetUsd,
-    totalUsd: totals.totalCostUsd,
-    overUsd: totals.totalCostUsd - level.maxBudgetUsd,
-  };
+  const budget =
+    level === null
+      ? null
+      : {
+          maxUsd: level.maxBudgetUsd,
+          totalUsd: totals.totalCostUsd,
+          overUsd: totals.totalCostUsd - level.maxBudgetUsd,
+        };
   const mass = {
     payloadKg: totals.payloadMassKg,
     capacityKg: rocket.maxLeoPayloadKg,
@@ -107,19 +120,22 @@ export function evaluateMission(levelId: LevelId, design: CompleteDesign): Evalu
     exposedCapsules,
     exposedCrew: exposedCapsules.reduce((sum, p) => sum + p.crew, 0),
   };
-  const objective = {
-    missingHardware: level.objective.hardware.filter(
-      (requirement) => !requirement.anyOf.some((id) => design.payloadIds.includes(id)),
-    ),
-    orbitAccepted: level.objective.orbits.includes(orbit.id),
-  };
+  const objective =
+    level === null
+      ? null
+      : {
+          missingHardware: level.objective.hardware.filter(
+            (requirement) => !requirement.anyOf.some((id) => design.payloadIds.includes(id)),
+          ),
+          orbitAccepted: level.objective.orbits.includes(orbit.id),
+        };
 
   const checks: Check[] = [
-    budgetCheck(budget),
+    ...(budget === null ? [] : [budgetCheck(budget)]),
     massCheck(mass, rocket),
     deltaVCheck(deltaV, rocket, orbit),
     radiationCheck(radiation, totals, orbit, payloads),
-    objectiveCheck(objective, level, orbit),
+    ...(level === null || objective === null ? [] : [objectiveCheck(objective, level, orbit)]),
   ];
 
   return {
@@ -139,7 +155,7 @@ export function evaluateMission(levelId: LevelId, design: CompleteDesign): Evalu
   };
 }
 
-function budgetCheck(budget: Evaluation['budget']): Check {
+function budgetCheck(budget: NonNullable<Evaluation['budget']>): Check {
   const passed = budget.overUsd <= 0;
   return {
     id: 'budget',
@@ -213,7 +229,7 @@ function radiationCheck(
 }
 
 function objectiveCheck(
-  objective: Evaluation['objective'],
+  objective: NonNullable<Evaluation['objective']>,
   level: LevelSpec,
   orbit: OrbitSpec,
 ): Check {

@@ -15,15 +15,17 @@ export interface SimulationResult {
   readonly flight: Flight;
   /** The written explanation. */
   readonly report: MissionReport;
-  /** Null after a failure. */
+  /** Null after a failure, and always in free exploration. */
   readonly score: Score | null;
 }
 
 /**
  * Computes a whole launch before anything is animated. It is deterministic:
  * the same level and design always give the same result.
+ *
+ * `levelId` is the contract, or null for a flight in free exploration.
  */
-export function simulate(levelId: LevelId, design: CompleteDesign): SimulationResult {
+export function simulate(levelId: LevelId | null, design: CompleteDesign): SimulationResult {
   const evaluation = evaluateMission(levelId, design);
   const flight = buildFlight(evaluation);
   return {

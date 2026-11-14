@@ -52,16 +52,20 @@ const TWO_STARS = 65;
  * optimal design earns every point, 100 in total. Any other design falls short
  * of it in money saved or in delta-v reserve, so its total is rounded to the
  * nearest integer but kept at 99 or less. A failed mission has no score.
+ *
+ * A flight in free exploration has no score either: with no contract and no
+ * budget there is no optimal design to measure it against.
  */
 export function computeScore(evaluation: Evaluation): Score | null {
-  if (evaluation.failure !== null) return null;
+  const { level, budget } = evaluation;
+  if (evaluation.failure !== null || level === null || budget === null) return null;
 
   // The search covers every design, this one included, so it always finds one.
-  const best = findOptimalDesign(evaluation.level.id);
-  if (best === null) throw new Error(`No optimal design for level ${evaluation.level.id}`);
+  const best = findOptimalDesign(level.id);
+  if (best === null) throw new Error(`No optimal design for level ${level.id}`);
 
-  const maxUsd = evaluation.budget.maxUsd;
-  const saved = maxUsd - evaluation.budget.totalUsd;
+  const maxUsd = budget.maxUsd;
+  const saved = maxUsd - budget.totalUsd;
   const bestSaved = maxUsd - best.totalUsd;
   const budgetPoints = pointsAgainstBest(BUDGET_POINTS, saved, bestSaved);
 
@@ -184,7 +188,7 @@ function searchOptimalDesign(levelId: LevelId): OptimalDesign | null {
           if (evaluation.failure !== null) continue;
           const candidate: OptimalDesign = {
             design: evaluation.design,
-            totalUsd: evaluation.budget.totalUsd,
+            totalUsd: evaluation.totals.totalCostUsd,
             reserve: reserveOf(evaluation),
           };
           if (best === null || isBetter(candidate, best)) best = candidate;

@@ -8,6 +8,7 @@ import {
   LEVEL_1_WIN,
   next,
   planMission,
+  startExploring,
   startPlanning,
 } from './helpers.ts';
 
@@ -104,6 +105,31 @@ test.describe('automated accessibility checks', () => {
     await expectNoAccessibilityViolations(page);
   });
 
+  test('free exploration, from the first step to the debrief', async ({ page }) => {
+    await startExploring(page);
+    await expectNoAccessibilityViolations(page);
+    await chooseCheckbox(page, /Orbital Observatory/);
+    await chooseCheckbox(page, /Modern Commercial Capsule/);
+
+    const steps = page.getByRole('navigation', { name: 'Planning steps' });
+    await steps.getByRole('link', { name: /Mission/ }).click();
+    await expect(page.getByRole('radio', { name: /Free exploration/ })).toBeChecked();
+    await expectNoAccessibilityViolations(page);
+
+    await steps.getByRole('link', { name: /Orbit/ }).click();
+    await chooseRadio(page, /Low Earth Orbit/);
+    await next(page);
+    await chooseRadio(page, /Falcon 9/);
+    await next(page);
+    await expect(page.getByRole('heading', { level: 1, name: 'Mission summary' })).toBeVisible();
+    await expectNoAccessibilityViolations(page);
+
+    await launch(page);
+    await page.getByRole('link', { name: /Skip to debrief|View mission debrief/ }).click();
+    await expect(page.getByText('Flight successful')).toBeVisible();
+    await expectNoAccessibilityViolations(page);
+  });
+
   test('page not found', async ({ page }) => {
     await page.goto('/nowhere');
     await expect(page.getByRole('heading', { level: 1, name: 'Lost in space' })).toBeVisible();
@@ -156,6 +182,21 @@ test.describe('small screens', () => {
     await expectNoSidewaysScroll(page);
     await page.getByRole('link', { name: 'View mission debrief' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Mission debrief' })).toBeVisible();
+    await expectNoSidewaysScroll(page);
+    await expectNoAccessibilityViolations(page);
+  });
+
+  test('free exploration fits a 320 pixel wide screen', async ({ page }) => {
+    await startExploring(page);
+    // Expensive choices make the cost in the header as wide as it gets.
+    await chooseCheckbox(page, /Heavy Shielded/);
+    await chooseCheckbox(page, /Habitat/);
+    await expectNoSidewaysScroll(page);
+    await page
+      .getByRole('navigation', { name: 'Planning steps' })
+      .getByRole('link', { name: /Mission/ })
+      .click();
+    await expect(page.getByRole('radio', { name: /Free exploration/ })).toBeChecked();
     await expectNoSidewaysScroll(page);
     await expectNoAccessibilityViolations(page);
   });

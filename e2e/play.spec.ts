@@ -7,6 +7,7 @@ import {
   LEVEL_1_WIN,
   next,
   planMission,
+  startExploring,
   startPlanning,
 } from './helpers.ts';
 
@@ -172,6 +173,112 @@ test.describe('use case 1: launch', () => {
     await expect(page.getByText('Medical alert!', { exact: false })).toBeVisible();
     await page.getByRole('link', { name: 'Fix the design' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Orbit selection' })).toBeVisible();
+  });
+});
+
+test.describe('free exploration', () => {
+  test('any design can be chosen whatever it costs, and only physics judges it', async ({
+    page,
+  }) => {
+    await startExploring(page);
+    // The header shows the cost, with no budget to measure it against.
+    const header = page.getByRole('banner');
+    await expect(header.getByText('Free exploration')).toBeVisible();
+    await expect(header.getByText('No budget limit')).toBeVisible();
+    await expect(page.getByRole('meter')).toHaveCount(0);
+    // Step 1 is done: free exploration is the mission.
+    const steps = page.getByRole('navigation', { name: 'Planning steps' });
+    await expect(steps.getByRole('link', { name: /^Mission.*done$/ })).toBeVisible();
+
+    // A whole crewed station: $780M of payload, more than any contract can pay.
+    for (const payload of [
+      'Heavy Shielded',
+      'Docking & Power',
+      'Scientific Laboratory',
+      'Habitat',
+    ]) {
+      await chooseCheckbox(page, new RegExp(payload));
+    }
+    await expect(header.getByText('$780M')).toBeVisible();
+    await expect(page.getByText(/Over budget/)).toHaveCount(0);
+
+    // No warning stops the player on the way.
+    await next(page);
+    await expect(page.getByRole('heading', { level: 1, name: 'Orbit selection' })).toBeVisible();
+    await chooseRadio(page, /Low Earth Orbit/);
+    await next(page);
+    await chooseRadio(page, /Saturn V/);
+    await next(page);
+    await expect(page.getByRole('heading', { level: 1, name: 'Mission summary' })).toBeVisible();
+    await expect(page.getByRole('alertdialog')).toHaveCount(0);
+    await expect(header.getByText('$1,980M')).toBeVisible();
+    await expect(page.getByText('No budget limit in free exploration.')).toBeVisible();
+    await expect(page.getByText('Ready for launch')).toBeVisible();
+
+    await launch(page);
+    await page.getByRole('link', { name: 'Skip to debrief' }).click();
+    await expect(page.getByRole('heading', { name: 'Mission accomplished' })).toBeVisible();
+    await expect(page.getByText('Flight successful')).toBeVisible();
+    // No score, and the debrief says why.
+    await expect(page.getByText('Free exploration flights are not scored.')).toBeVisible();
+    await expect(page.getByText(/^Score:/)).toHaveCount(0);
+    // Only the rules of physics are checked.
+    await expect(page.getByText('Payload mass: passed')).toBeVisible();
+    await expect(page.getByText('Delta-v: passed')).toBeVisible();
+    await expect(page.getByText('Crew radiation: passed')).toBeVisible();
+    await expect(page.getByText(/^Budget:/)).toHaveCount(0);
+    await expect(page.getByText(/^Contract objective:/)).toHaveCount(0);
+    await expect(page.getByText('(no budget limit)')).toBeVisible();
+
+    // A contract is one press away, and the free flight counted for none of them.
+    await page.getByRole('button', { name: 'Fly a contract' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Mission type' })).toBeVisible();
+    await expect(page.getByRole('radio', { name: /Free exploration/ })).not.toBeChecked();
+    await expect(page.getByText(/Completed ·/)).toHaveCount(0);
+  });
+
+  test('a design that physics does not allow still fails', async ({ page }) => {
+    await startExploring(page);
+    await chooseCheckbox(page, /Telecommunications/);
+    await next(page);
+    await chooseRadio(page, /Low Earth Orbit/);
+    await next(page);
+    await chooseRadio(page, /Electron/);
+    await next(page);
+    await launch(page);
+    await page.getByRole('link', { name: 'Skip to debrief' }).click();
+
+    await expect(page.getByText('Flight failed')).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Vehicle lost at Max-Q: payload too heavy' }),
+    ).toBeVisible();
+    await expect(page.getByText('Payload mass: failed')).toBeVisible();
+    await page.getByRole('link', { name: 'Fix the design' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Rocket selection' })).toBeVisible();
+    await expect(page.getByRole('banner').getByText('No budget limit')).toBeVisible();
+  });
+
+  test('the same design moves between a contract and free exploration', async ({ page }) => {
+    await startPlanning(page);
+    await chooseRadio(page, /^Mission 1:/);
+    await next(page);
+    await chooseCheckbox(page, /Telecommunications/);
+    const overBudget = page.getByRole('alert').filter({ hasText: 'Over budget by $40M' });
+    await expect(overBudget).toBeVisible();
+
+    // Free exploration is the last card of the first step.
+    const steps = page.getByRole('navigation', { name: 'Planning steps' });
+    await steps.getByRole('link', { name: /Mission/ }).click();
+    await chooseRadio(page, /Free exploration/);
+    await expect(page.getByText('Budget: no limit')).toBeVisible();
+    await next(page);
+    await expect(page.getByRole('checkbox', { name: /Telecommunications/ })).toBeChecked();
+    await expect(overBudget).toHaveCount(0);
+
+    // Back to the contract: the budget applies again.
+    await steps.getByRole('link', { name: /Mission/ }).click();
+    await chooseRadio(page, /^Mission 1:/);
+    await expect(overBudget).toBeVisible();
   });
 });
 

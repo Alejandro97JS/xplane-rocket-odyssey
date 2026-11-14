@@ -2,6 +2,7 @@ import {
   formatMass,
   formatPercent,
   formatUsd,
+  FREE_EXPLORATION,
   getNextLevel,
   selectRecord,
   type Check,
@@ -19,6 +20,7 @@ import {
   CheckIcon,
   ChevronRightIcon,
   CrossIcon,
+  InfinityIcon,
   LightbulbIcon,
   ReplayIcon,
   StarIcon,
@@ -36,28 +38,39 @@ function stepToFix(result: SimulationResult): StepId {
     case 'radiation':
       return 'orbit';
     case 'objective_unfulfilled':
-      return result.evaluation.objective.missingHardware.length > 0 ? 'payload' : 'orbit';
+      return (result.evaluation.objective?.missingHardware.length ?? 0) > 0 ? 'payload' : 'orbit';
     case null:
       return 'summary';
   }
 }
 
+const NUMBER_WORDS = ['no', 'one', 'two', 'three', 'four', 'five'];
+
 /**
  * The debrief: what happened, why, and what to try next. Everything here is
  * ordinary text built from the same data the animation played back.
+ *
+ * A flight in free exploration has no contract: it gets no score and no
+ * record, the flight review lists only the rules of physics, and the cost is
+ * shown without a budget.
  */
 export function DebriefScreen() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const launch = useGame((state) => state.launch);
   const result = useLaunchResult();
-  const record = useGame((state) => (launch ? selectRecord(state, launch.levelId) : null));
-  if (!launch || !result || !record) return <Navigate to="/plan/mission" replace />;
+  const record = useGame((state) => (launch?.levelId ? selectRecord(state, launch.levelId) : null));
+  if (!launch || !result) return <Navigate to="/plan/mission" replace />;
 
   const { evaluation, report, score } = result;
-  const { level, rocket, orbit } = evaluation;
+  const { level, rocket, orbit, budget } = evaluation;
   const success = result.outcome === 'success';
-  const nextLevel = getNextLevel(level.id);
+  const nextLevel = level ? getNextLevel(level.id) : null;
+  const ruleCount = NUMBER_WORDS[evaluation.checks.length] ?? String(evaluation.checks.length);
+
+  let verdict: string;
+  if (level === null) verdict = success ? 'Flight successful' : 'Flight failed';
+  else verdict = success ? 'Contract fulfilled' : 'Mission failed';
 
   return (
     <>
@@ -66,16 +79,24 @@ export function DebriefScreen() {
         <StepPanel
           badge={success ? <CheckIcon /> : <CrossIcon />}
           title="Mission debrief"
-          subtitle={`Mission ${level.number}: ${level.title} · attempt ${record.attempts}`}
+          subtitle={
+            level
+              ? `Mission ${level.number}: ${level.title} · attempt ${record?.attempts ?? 1}`
+              : `${FREE_EXPLORATION.title} · no contract, no budget limit`
+          }
         >
           {/* The verdict */}
           <Frame tone={success ? 'good' : 'bad'} className="px-5 py-5 sm:px-7">
-            <p className={cx('label !text-base', success ? '!text-go' : '!text-stop')}>
-              {success ? 'Contract fulfilled' : 'Mission failed'}
-            </p>
+            <p className={cx('label !text-base', success ? '!text-go' : '!text-stop')}>{verdict}</p>
             <h2 className="display mt-1 text-2xl text-ink sm:text-3xl">{report.headline}</h2>
             <p className="mt-2 text-lg text-ink">{report.summary}</p>
-            {score && <ScoreSummary score={score} best={record.bestScore} />}
+            {score && <ScoreSummary score={score} best={record?.bestScore ?? null} />}
+            {success && level === null && (
+              <p className="mt-4 flex items-center gap-2 border-t border-go/40 pt-4 text-ink-soft">
+                <InfinityIcon className="flex-none text-line-bright" />
+                {FREE_EXPLORATION.noScore}
+              </p>
+            )}
           </Frame>
 
           <div className="mt-5 grid gap-5 lg:grid-cols-2">
@@ -120,7 +141,10 @@ export function DebriefScreen() {
                   Flight review
                 </h2>
                 <p className="text-ink-soft">
-                  The five rules every mission must pass, in the order they matter in flight.
+                  The {ruleCount} rules every {level ? 'mission' : 'flight'} must pass, in the order
+                  they matter in flight.
+                  {level === null &&
+                    ' Free exploration has no budget and no contract, so only the rules of physics apply.'}
                 </p>
                 <ol className="mt-3 space-y-3">
                   {evaluation.checks.map((check) => (
@@ -149,10 +173,11 @@ export function DebriefScreen() {
                 <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
                   <dt className="text-ink-soft">Mission cost:</dt>
                   <dd className="font-bold text-ink tabular-nums">
-                    {formatUsd(evaluation.budget.totalUsd)}{' '}
+                    {formatUsd(evaluation.totals.totalCostUsd)}{' '}
                     <span className="font-medium text-ink-soft">
-                      of {formatUsd(evaluation.budget.maxUsd)} (
-                      {formatPercent(evaluation.budget.totalUsd / evaluation.budget.maxUsd)})
+                      {budget
+                        ? `of ${formatUsd(budget.maxUsd)} (${formatPercent(budget.totalUsd / budget.maxUsd)})`
+                        : '(no budget limit)'}
                     </span>
                   </dd>
                   <dt className="text-ink-soft">Payload mass:</dt>
@@ -206,7 +231,23 @@ export function DebriefScreen() {
               Watch the launch again
             </ActionButton>
             <div className="flex flex-wrap gap-3">
-              {success ? (
+              {success && level === null ? (
+                <>
+                  <ActionButton
+                    variant="secondary"
+                    onPress={() => {
+                      dispatch({ type: 'mode/select', mode: 'contract' });
+                      void navigate(getStep('mission').path);
+                    }}
+                  >
+                    Fly a contract
+                  </ActionButton>
+                  <ActionButton variant="primary" href={getStep('summary').path}>
+                    Try another design
+                    <ChevronRightIcon />
+                  </ActionButton>
+                </>
+              ) : success ? (
                 <>
                   {!score?.optimal && (
                     <ActionButton variant="secondary" href={getStep('summary').path}>
@@ -244,7 +285,7 @@ export function DebriefScreen() {
               )}
             </div>
           </div>
-          {success && !nextLevel && (
+          {success && level && !nextLevel && (
             <p className="mt-3 text-right text-ink-soft">
               That was the last mission. Every contract can be flown again for a better score.
             </p>

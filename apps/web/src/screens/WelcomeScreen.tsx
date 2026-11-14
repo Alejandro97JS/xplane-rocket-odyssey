@@ -1,10 +1,11 @@
 import { LEVELS, selectCompletedCount } from '@rocket-odyssey/game-core';
-import { useGame } from '../app/store.ts';
+import { useNavigate } from 'react-router';
+import { useDispatch, useGame } from '../app/store.ts';
 import { getStep } from '../app/steps.ts';
 import { RocketSvg } from '../art/RocketSvg.tsx';
 import { ActionButton } from '../components/ActionButton.tsx';
 import { Frame } from '../components/Frame.tsx';
-import { ChevronRightIcon } from '../components/icons.tsx';
+import { ChevronRightIcon, InfinityIcon } from '../components/icons.tsx';
 import { Logo } from '../components/Logo.tsx';
 import { usePageHeading } from '../lib/usePageHeading.ts';
 
@@ -27,11 +28,17 @@ const LOOP = [
   },
 ];
 
-/** The title screen: the name of the game, what it is about and one way in. */
+/**
+ * The title screen: the name of the game, what it is about and two ways in.
+ * Contracts come first: they are the game. Free exploration is next to them,
+ * for players who want to try anything without a budget.
+ */
 export function WelcomeScreen() {
   const headingRef = usePageHeading('Welcome');
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const completed = useGame(selectCompletedCount);
-  const started = useGame((state) => state.levelId !== null);
+  const contractStarted = useGame((state) => state.levelId !== null);
 
   return (
     <main id="main" className="flex flex-1 flex-col justify-center py-4">
@@ -55,18 +62,41 @@ export function WelcomeScreen() {
               find out if your design reaches orbit.
             </p>
 
-            <div className="mt-9 flex flex-wrap items-center gap-4">
-              <ActionButton
-                variant="primary"
-                href={getStep('mission').path}
-                className="!min-h-16 !px-6 !text-xl sm:!px-9 sm:!text-2xl"
-              >
-                {started ? 'Continue planning' : 'Start mission'}
-                <ChevronRightIcon />
-              </ActionButton>
-              <p className="text-ink-soft">
-                {LEVELS.length} missions · {completed} completed
-              </p>
+            <div className="mt-9 grid max-w-2xl gap-x-5 gap-y-6 sm:grid-cols-2">
+              <div>
+                <ActionButton
+                  variant="primary"
+                  href={getStep('mission').path}
+                  onPress={() => dispatch({ type: 'mode/select', mode: 'contract' })}
+                  aria-describedby="contracts-caption"
+                  className="!min-h-16 w-full !px-6 !text-xl sm:!text-2xl"
+                >
+                  {contractStarted ? 'Continue planning' : 'Start mission'}
+                  <ChevronRightIcon />
+                </ActionButton>
+                <p id="contracts-caption" className="mt-2 text-ink-soft">
+                  {LEVELS.length} contracts, each with a client and a budget · {completed} completed
+                </p>
+              </div>
+              <div>
+                {/* A button, not a link: the mode must change before the step opens. */}
+                <ActionButton
+                  variant="secondary"
+                  onPress={() => {
+                    dispatch({ type: 'mode/select', mode: 'free_exploration' });
+                    void navigate(getStep('payload').path);
+                  }}
+                  aria-describedby="free-caption"
+                  className="!min-h-16 w-full !px-6 !text-xl sm:!text-2xl"
+                >
+                  <InfinityIcon />
+                  Free exploration
+                </ActionButton>
+                <p id="free-caption" className="mt-2 text-ink-soft">
+                  No contract and no budget limit. Fly anything you want and see what physics
+                  allows.
+                </p>
+              </div>
             </div>
           </div>
 

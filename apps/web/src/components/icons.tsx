@@ -132,6 +132,11 @@ export const UsersIcon = (p: IconProps) => (
     <path d="M2.500 20c.5-3.500 3-5.500 6.500-5.500s6 2 6.500 5.500M16 4.800a3.500 3.500 0 0 1 0 6.400M18.500 14.800c1.700.8 2.700 2.500 3 5.200" />
   </Icon>
 );
+export const InfinityIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 12c-1.900-2.600-3.700-4-5.800-4a4 4 0 0 0 0 8c2.100 0 3.900-1.400 5.800-4zm0 0c1.900 2.600 3.700 4 5.800 4a4 4 0 0 0 0-8c-2.100 0-3.900 1.400-5.800 4z" />
+  </Icon>
+);
 export const GaugeIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M3.500 17a9 9 0 1 1 17 0" />

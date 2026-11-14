@@ -6,8 +6,8 @@ Use case 1, the launch, is implemented end to end: a title screen, five planning
 
 | Address | Screen | What the player does |
 | --- | --- | --- |
-| `/` | Title screen | Reads what the game is and starts. |
-| `/plan/mission` | 1. Mission type | Chooses one of the five contracts and reads its briefing and budget. |
+| `/` | Title screen | Reads what the game is and starts a contract or free exploration. |
+| `/plan/mission` | 1. Mission type | Chooses one of the five contracts, or free exploration, and reads its briefing and budget. |
 | `/plan/payload` | 2. Equipment & payload | Selects any number of the twelve payloads. Cost and mass add up as they change. |
 | `/plan/orbit` | 3. Orbit selection | Chooses one of the five orbits and sees its path and the delta-v it needs. |
 | `/plan/rocket` | 4. Rocket selection | Chooses one of the eight rockets and sees how much of its capacity the payload uses. |
@@ -16,6 +16,8 @@ Use case 1, the launch, is implemented end to end: a title screen, five planning
 | `/debrief` | Mission debrief | Reads what happened and why, the hint, the five rules with their result, the numbers and the score. |
 
 The player moves freely between the five steps with the stepper at the bottom of each one. The budget of the contract is in the header of every step. Every screen has its own address, so the back button of the browser works.
+
+Free exploration, added on 2026-11-14, uses the same screens with no contract and no budget. It is described in [free_exploration.md](free_exploration.md).
 
 A flight ends in one of seven ways, each with its own animation and texts: success, scrubbed on the pad (over budget), breakup at Max-Q (payload too heavy), re-entry (short of delta-v before the first orbit), stranded (short of delta-v during the transfer), crew exposed to radiation, and objective missed.
 
@@ -26,6 +28,7 @@ packages/game-core/src
   ids.ts                 Identifiers of levels, payloads, orbits and rockets
   catalog/               The four tables of the use case, as data
   design.ts              What the player has chosen; totals of mass, cost and crew
+  exploration.ts         Texts of free exploration, the mode with no contract and no budget
   physics.ts             Rocket equation per stage; orbital speeds and periods
   rules.ts               evaluateMission: the five rules applied to a design
   flight.ts              buildFlight: events, phases and telemetry of the flight
@@ -75,8 +78,8 @@ How the altitude and speed curves are produced: during the climb they follow the
 
 | Command | What runs | Result on 2026-11-14 |
 | --- | --- | --- |
-| `npm test` | 219 unit tests: tables against the use case, physics, one case per failure and per valid path, every flight ending, the score and the optimal design of each level, reducer, serialization, playback mapping, rocket drawings, server. | All pass on 2026-11-14, after the score change. |
-| `npm run test:e2e` | 19 Playwright tests in Chrome against the production build: gameplay, keyboard only, reduced motion, axe on every screen, reflow at 320 pixels. | All pass on 2026-11-14, after the score change. |
+| `npm test` | 237 unit tests: tables against the use case, physics, one case per failure and per valid path, every flight ending, the score and the optimal design of each level, free exploration, reducer, serialization, playback mapping, rocket drawings, server. | All pass on 2026-11-14, after free exploration was added. |
+| `npm run test:e2e` | 25 Playwright tests in Chrome against the production build: gameplay, free exploration, keyboard only, reduced motion, axe on every screen, reflow at 320 pixels. | All pass on 2026-11-14, after free exploration was added. |
 | `npm run typecheck` | TypeScript strict in the three packages and the end-to-end tests. | No errors. |
 | `npm run lint` | ESLint with `typescript-eslint`, `jsx-a11y` and the rules of hooks. | No errors. |
 

@@ -2,7 +2,7 @@
 
 An educational game about designing a space mission. The player picks a contract, a payload, an orbit and a rocket, balances money, mass and delta-v, then launches and reads why the mission worked or failed.
 
-This version contains use case 1, the launch: five missions, a launch animation and a written debrief.
+This version contains use case 1, the launch: five missions, a launch animation and a written debrief. It also has a free exploration mode, with no contract and no budget, where the player can fly any design whatever it costs and only physics decides the result.
 
 ## Requirements
 

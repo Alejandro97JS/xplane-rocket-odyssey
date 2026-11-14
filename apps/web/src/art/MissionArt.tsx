@@ -4,8 +4,8 @@ import { EarthSphere } from './EarthSphere.tsx';
 import { PayloadGlyph } from './PayloadArt.tsx';
 
 /**
- * A small scene for each mission, in a 320 x 160 box. Decorative: the card
- * that shows it gives the title and the goal of the mission in text.
+ * A small scene for each mission, and one for free exploration, in a 320 x 160
+ * box. Decorative: the card that shows it gives the title and the goal in text.
  */
 
 const STARS: [number, number, number][] = [
@@ -177,22 +177,61 @@ function OrbitalOutpost({ id }: { id: string }) {
   );
 }
 
-const SCENES: Record<LevelId, (props: { id: string }) => ReactNode> = {
+/** Free exploration: every orbit open, and payloads of every kind on them. */
+function FreeExploration({ id }: { id: string }) {
+  return (
+    <>
+      <Sky id={id} tint="#251b63" />
+      <defs>
+        <radialGradient id={`${id}-glow`} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#a78bfa" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#a78bfa" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <ellipse cx="236" cy="56" rx="120" ry="64" fill={`url(#${id}-glow)`} />
+      {/* A low, a high and an elliptical orbit, all centred on the Earth */}
+      <g fill="none" strokeWidth="1.400" strokeDasharray="4 3">
+        <ellipse cx="60" cy="200" rx="150" ry="110" stroke="#9be5ff" opacity="0.8" />
+        <ellipse cx="60" cy="200" rx="240" ry="165" stroke="#9be5ff" opacity="0.55" />
+        <ellipse cx="60" cy="200" rx="300" ry="200" stroke="#ffdc6b" opacity="0.7" />
+      </g>
+      <EarthSphere cx={60} cy={200} r={96} spin={70} />
+      <g transform="translate(109 87) scale(0.32)">
+        <PayloadGlyph payloadId="cubesat" />
+      </g>
+      <g transform="translate(107 24) scale(0.34)">
+        <PayloadGlyph payloadId="capsule_modern" />
+      </g>
+      <g transform="translate(196 60) scale(0.42)">
+        <PayloadGlyph payloadId="telecom" />
+      </g>
+      <g transform="translate(176 4) scale(0.42)">
+        <PayloadGlyph payloadId="observatory" />
+      </g>
+    </>
+  );
+}
+
+/** What a scene can show: a contract, or free exploration. */
+export type MissionScene = LevelId | 'free_exploration';
+
+const SCENES: Record<MissionScene, (props: { id: string }) => ReactNode> = {
   first_space_data: FirstSpaceData,
   environmental_surveillance: EnvironmentalSurveillance,
   connecting_the_continent: ConnectingTheContinent,
   human_horizon: HumanHorizon,
   orbital_outpost: OrbitalOutpost,
+  free_exploration: FreeExploration,
 };
 
 interface MissionArtProps {
-  levelId: LevelId;
+  scene: MissionScene;
   className?: string;
 }
 
-export function MissionArt({ levelId, className }: MissionArtProps) {
+export function MissionArt({ scene, className }: MissionArtProps) {
   const id = useId();
-  const Scene = SCENES[levelId];
+  const Scene = SCENES[scene];
   return (
     <svg
       aria-hidden="true"

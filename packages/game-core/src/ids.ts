@@ -5,6 +5,15 @@ import { z } from 'zod';
  * the game state stays serializable.
  */
 
+/**
+ * How the player plays. A contract has a client, an objective and a budget.
+ * Free exploration has none of them: the player may choose anything, whatever
+ * it costs, and only the physics of the flight decides the result.
+ */
+export const PLAY_MODES = ['contract', 'free_exploration'] as const;
+export const PlayModeSchema = z.enum(PLAY_MODES);
+export type PlayMode = z.infer<typeof PlayModeSchema>;
+
 export const LEVEL_IDS = [
   'first_space_data',
   'environmental_surveillance',

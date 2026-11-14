@@ -11,6 +11,7 @@ export * from './catalog/orbits.ts';
 export * from './catalog/payloads.ts';
 export * from './catalog/rockets.ts';
 export * from './design.ts';
+export * from './exploration.ts';
 export * from './flight.ts';
 export * from './format.ts';
 export * from './hints.ts';

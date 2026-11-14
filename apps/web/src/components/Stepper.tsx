@@ -1,3 +1,4 @@
+import { selectHasMission } from '@rocket-odyssey/game-core';
 import { Link } from 'react-aria-components';
 import { useGame } from '../app/store.ts';
 import { isStepDone, STEPS, type StepId } from '../app/steps.ts';
@@ -10,12 +11,13 @@ interface StepperProps {
 
 /**
  * The row of numbered steps at the bottom of every planning screen. The
- * player can jump to any step at any time. Before a mission is chosen the
- * other steps have nothing to plan, so they are shown but cannot be opened.
+ * player can jump to any step at any time. Before a mission is chosen, or
+ * free exploration, the other steps have nothing to plan, so they are shown
+ * but cannot be opened.
  */
 export function Stepper({ current }: StepperProps) {
   const state = useGame((s) => s);
-  const hasMission = state.levelId !== null;
+  const hasMission = selectHasMission(state);
 
   return (
     <nav aria-label="Planning steps">

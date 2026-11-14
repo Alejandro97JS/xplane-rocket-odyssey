@@ -24,9 +24,9 @@ The target is WCAG 2.1 AA. This document records what was done to meet it, what 
 
 ## What the automated checks cover
 
-`npm run test:e2e` runs axe with the WCAG 2.0 and 2.1 A and AA rules on: the title screen; each of the five steps, empty and filled in; the summary with nothing chosen; the over-budget alert and its dialog; the launch as a list of steps; the animated launch, paused; the debrief after a success and after a failure; the page for an unknown address; and the debrief at 320 pixels. All pass with no violations.
+`npm run test:e2e` runs axe with the WCAG 2.0 and 2.1 A and AA rules on: the title screen; each of the five steps, empty and filled in; the summary with nothing chosen; the over-budget alert and its dialog; the launch as a list of steps; the animated launch, paused; the debrief after a success and after a failure; the page for an unknown address; and the debrief at 320 pixels. Since 2026-11-14 it also covers free exploration: the payload step with the cost in the header, step 1 with the free exploration card selected, the summary, the debrief, and step 1 at 320 pixels.
 
-The same run plays the level with the keyboard alone, checks the dialog focus trap and checks reflow at 320 pixels on every screen.
+The same run plays the level with the keyboard alone, enters free exploration with the keyboard and moves between it and the contracts with the arrow keys, checks the dialog focus trap and checks reflow at 320 pixels on every screen. The decisions about the accessibility of free exploration are in [free_exploration.md](free_exploration.md).
 
 Two findings of that work were fixed on the way: the link in the header had a name that did not contain its visible text, and the first screen took focus away from the skip link.
 

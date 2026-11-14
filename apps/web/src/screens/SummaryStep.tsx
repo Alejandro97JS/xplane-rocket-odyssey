@@ -4,12 +4,14 @@ import {
   formatPercent,
   formatSpeedKms,
   formatUsd,
+  FREE_EXPLORATION,
   getLevel,
   getOrbit,
   getPayload,
   getRocket,
   lowerFirst,
   selectBudget,
+  selectIsFreeExploration,
   selectReadiness,
   selectTotals,
 } from '@rocket-odyssey/game-core';
@@ -21,7 +23,14 @@ import { getStep, type StepId } from '../app/steps.ts';
 import { RocketSvg } from '../art/RocketSvg.tsx';
 import { ActionButton } from '../components/ActionButton.tsx';
 import { Frame } from '../components/Frame.tsx';
-import { AlertIcon, BoxIcon, OrbitIcon, RocketIcon, TargetIcon } from '../components/icons.tsx';
+import {
+  AlertIcon,
+  BoxIcon,
+  InfinityIcon,
+  OrbitIcon,
+  RocketIcon,
+  TargetIcon,
+} from '../components/icons.tsx';
 import { LoadMeter } from '../components/LoadMeter.tsx';
 import { StepNav } from '../components/StepNav.tsx';
 import { StepPanel } from '../components/StepPanel.tsx';
@@ -35,10 +44,12 @@ export function SummaryStep() {
   const totals = selectTotals(state);
   const budget = selectBudget(state);
   const readiness = selectReadiness(state);
+  const freeExploration = selectIsFreeExploration(state);
   const [showMissing, setShowMissing] = useState(false);
   const statusRef = useRef<HTMLParagraphElement>(null);
 
-  const level = state.levelId ? getLevel(state.levelId) : null;
+  // Free exploration keeps the contract chosen before, but does not fly it.
+  const level = !freeExploration && state.levelId ? getLevel(state.levelId) : null;
   const payloads = state.design.payloadIds.map(getPayload);
   const orbit = state.design.orbitId ? getOrbit(state.design.orbitId) : null;
   const rocket = state.design.rocketId ? getRocket(state.design.rocketId) : null;
@@ -74,7 +85,14 @@ export function SummaryStep() {
         <Frame tone="default" className="px-4 py-2 sm:px-6">
           <ul className="divide-y divide-line-dim/60">
             <SummaryRow icon={<TargetIcon />} label="Mission type" step="mission">
-              {level ? (
+              {freeExploration ? (
+                <>
+                  <span className="font-bold text-ink">{FREE_EXPLORATION.title}</span>
+                  <span className="block text-ink-soft">
+                    No contract and no budget limit. {FREE_EXPLORATION.goal}
+                  </span>
+                </>
+              ) : level ? (
                 <>
                   <span className="font-bold text-ink">{level.title}</span>
                   <span className="block text-ink-soft">{level.goal}</span>
@@ -146,6 +164,22 @@ export function SummaryStep() {
           </h2>
           <div className="mt-2 grid gap-4 md:grid-cols-2">
             <Frame tone={budget?.over ? 'bad' : 'plain'} className="px-4 py-3.5">
+              {freeExploration && (
+                <>
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                    <p className="label !text-ink">Mission cost</p>
+                    <p className="value tabular-nums">{formatUsd(totals.totalCostUsd)}</p>
+                  </div>
+                  <p className="mt-1.5 text-ink-soft tabular-nums">
+                    Payload {formatUsd(totals.payloadCostUsd)} · rocket{' '}
+                    {formatUsd(totals.rocketCostUsd)}
+                  </p>
+                  <p className="mt-1.5 flex items-center gap-1.5 font-semibold text-line-bright">
+                    <InfinityIcon className="flex-none" />
+                    No budget limit in free exploration.
+                  </p>
+                </>
+              )}
               {budget && (
                 <>
                   <div className="flex flex-wrap items-baseline justify-between gap-x-4">
@@ -276,7 +310,7 @@ export function SummaryStep() {
               The design is complete, but it is over budget. The launch will be scrubbed.
             </p>
           )}
-          {readiness.ready && !budget?.over && level && rocket && orbit && (
+          {readiness.ready && !budget?.over && rocket && orbit && (
             <p className="mt-1 text-center text-ink-soft">
               {rocket.shortName} will carry the{' '}
               {formatList(payloads.map((payload) => lowerFirst(payload.shortName)))} to{' '}

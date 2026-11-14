@@ -1,15 +1,31 @@
 import { z } from 'zod';
 import { computeTotals, EMPTY_DESIGN, isCompleteDesign, sortPayloadIds } from './design.ts';
-import { LevelIdSchema, OrbitIdSchema, PayloadIdSchema, RocketIdSchema } from './ids.ts';
+import {
+  LevelIdSchema,
+  OrbitIdSchema,
+  PayloadIdSchema,
+  PlayModeSchema,
+  RocketIdSchema,
+} from './ids.ts';
 import { evaluateMission } from './rules.ts';
 import { computeScore } from './score.ts';
-import { createInitialState, selectRecord, type GameState } from './state.ts';
+import {
+  createInitialState,
+  selectIsFreeExploration,
+  selectRecord,
+  type GameState,
+} from './state.ts';
 
 /** Everything the player can do. Actions are plain JSON, like the state. */
 export const ActionSchema = z.discriminatedUnion('type', [
-  /** Choose the contract to plan. The design is kept. */
+  /**
+   * Play contracts or explore freely. The design and the chosen contract are
+   * kept, so the player can try a design without a budget and come back.
+   */
+  z.object({ type: z.literal('mode/select'), mode: PlayModeSchema }),
+  /** Choose the contract to plan. The design is kept. Leaves free exploration. */
   z.object({ type: z.literal('level/select'), levelId: LevelIdSchema }),
-  /** Start a contract from a clean design. */
+  /** Start a contract from a clean design. Leaves free exploration. */
   z.object({ type: z.literal('level/start'), levelId: LevelIdSchema }),
   z.object({ type: z.literal('payload/toggle'), payloadId: PayloadIdSchema }),
   z.object({ type: z.literal('orbit/select'), orbitId: OrbitIdSchema }),
@@ -33,13 +49,18 @@ export function parseAction(input: unknown): Action {
  */
 export function reduce(state: GameState, action: Action): GameState {
   switch (action.type) {
+    case 'mode/select':
+      if (state.mode === action.mode) return state;
+      return { ...state, mode: action.mode };
+
     case 'level/select':
-      if (state.levelId === action.levelId) return state;
-      return { ...state, levelId: action.levelId };
+      if (state.mode === 'contract' && state.levelId === action.levelId) return state;
+      return { ...state, mode: 'contract', levelId: action.levelId };
 
     case 'level/start':
       return {
         ...state,
+        mode: 'contract',
         levelId: action.levelId,
         design: EMPTY_DESIGN,
         budgetWarningDismissedAtUsd: null,
@@ -71,8 +92,17 @@ export function reduce(state: GameState, action: Action): GameState {
       };
 
     case 'mission/launch': {
-      // A launch needs a contract and a complete design. Anything else is ignored.
-      if (state.levelId === null || !isCompleteDesign(state.design)) return state;
+      // A launch needs a complete design, and a contract or free exploration.
+      // Anything else is ignored.
+      if (!isCompleteDesign(state.design)) return state;
+      const sequence = (state.launch?.sequence ?? 0) + 1;
+
+      // Free exploration has no contract, so the flight counts for no record.
+      if (selectIsFreeExploration(state)) {
+        return { ...state, launch: { levelId: null, design: state.design, sequence } };
+      }
+
+      if (state.levelId === null) return state;
       const evaluation = evaluateMission(state.levelId, state.design);
       const score = computeScore(evaluation);
       const record = selectRecord(state, state.levelId);
@@ -81,7 +111,7 @@ export function reduce(state: GameState, action: Action): GameState {
         launch: {
           levelId: state.levelId,
           design: state.design,
-          sequence: (state.launch?.sequence ?? 0) + 1,
+          sequence,
         },
         records: {
           ...state.records,

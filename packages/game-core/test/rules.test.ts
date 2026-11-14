@@ -368,7 +368,7 @@ describe('evaluateMission', () => {
       'human_horizon',
       design(['observatory', 'capsule_suborbital'], 'leo', 'ariane6'),
     );
-    expect(evaluation.budget.overUsd).toBe(0);
+    expect(evaluation.budget?.overUsd).toBe(0);
     expect(evaluation.checks[0]?.passed).toBe(true);
   });
 
@@ -473,7 +473,7 @@ describe('levels', () => {
       if (score.total === 100) perfect.push(d);
       const candidate = {
         design: d,
-        totalUsd: evaluation.budget.totalUsd,
+        totalUsd: evaluation.totals.totalCostUsd,
         reserve: evaluation.deltaV.marginMs / evaluation.deltaV.requiredMs,
       };
       if (

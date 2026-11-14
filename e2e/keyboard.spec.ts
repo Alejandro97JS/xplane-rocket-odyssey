@@ -83,6 +83,24 @@ test('the whole level can be played with the keyboard alone', async ({ page }) =
   await expectHeadingFocused(page, 'Mission type');
 });
 
+test('free exploration can be entered and left with the keyboard alone', async ({ page }) => {
+  await page.goto('/');
+  await tabTo(page, 'button', 'Free exploration');
+  await page.keyboard.press('Enter');
+  await expectHeadingFocused(page, 'Equipment & payload');
+
+  // Free exploration is the last radio button of the first step, after the five contracts.
+  await tabTo(page, 'link', /^Mission/);
+  await page.keyboard.press('Enter');
+  await expectHeadingFocused(page, 'Mission type');
+  await tabTo(page, 'radio', /Free exploration/);
+  await expect(page.getByRole('radio', { name: /Free exploration/ })).toBeChecked();
+  await page.keyboard.press('ArrowLeft');
+  await expect(page.getByRole('radio', { name: /^Mission 5:/ })).toBeChecked();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.getByRole('radio', { name: /Free exploration/ })).toBeChecked();
+});
+
 test('the over-budget dialog traps focus and closes with Escape', async ({ page }) => {
   await page.goto('/');
   await tabTo(page, 'link', 'Start mission');

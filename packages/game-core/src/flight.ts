@@ -1,3 +1,4 @@
+import { FREE_EXPLORATION } from './exploration.ts';
 import {
   formatAltitude,
   formatDuration,
@@ -163,7 +164,9 @@ export function buildFlight(evaluation: Evaluation): Flight {
     `All stations report go. ${rocket.shortName} switches to internal power.`,
   );
 
-  if (failure === 'budget_exceeded') {
+  // Only a contract has a budget, so only a contract can be scrubbed for it.
+  const budget = evaluation.budget;
+  if (failure === 'budget_exceeded' && budget !== null) {
     phase('countdown', 'Countdown', COUNTDOWN_START_S, -6);
     phase('scrub', 'Launch scrubbed', -6, 2);
     event(
@@ -171,7 +174,7 @@ export function buildFlight(evaluation: Evaluation): Flight {
       -6,
       'warning',
       'Hold! Hold! Hold!',
-      `The flight readiness review stops the clock: the mission costs ${formatUsd(evaluation.budget.totalUsd)}, which is ${formatUsd(evaluation.budget.overUsd)} over the ${formatUsd(evaluation.budget.maxUsd)} budget.`,
+      `The flight readiness review stops the clock: the mission costs ${formatUsd(budget.totalUsd)}, which is ${formatUsd(budget.overUsd)} over the ${formatUsd(budget.maxUsd)} budget.`,
     );
     event(
       'scrub',
@@ -724,7 +727,13 @@ export function buildFlight(evaluation: Evaluation): Flight {
     );
     return finish(operations.tEnd, 'objective_missed');
   }
-  event('mission_success', verdictTime, 'success', 'Mission accomplished', level.epilogue);
+  event(
+    'mission_success',
+    verdictTime,
+    'success',
+    'Mission accomplished',
+    level?.epilogue ?? FREE_EXPLORATION.epilogue,
+  );
   return finish(operations.tEnd, 'success');
 }
 

@@ -46,6 +46,13 @@ export async function startPlanning(page: Page): Promise<void> {
   await expect(page.getByRole('heading', { level: 1, name: 'Mission type' })).toBeVisible();
 }
 
+/** Opens the game and enters free exploration, which starts on the payload step. */
+export async function startExploring(page: Page): Promise<void> {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Free exploration' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Equipment & payload' })).toBeVisible();
+}
+
 /** Makes every choice of a design and stops on the summary. */
 export async function planMission(page: Page, design: DesignChoice): Promise<void> {
   await startPlanning(page);

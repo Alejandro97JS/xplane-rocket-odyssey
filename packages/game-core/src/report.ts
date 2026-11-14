@@ -1,3 +1,4 @@
+import { FREE_EXPLORATION } from './exploration.ts';
 import type { Flight } from './flight.ts';
 import {
   formatList,
@@ -29,6 +30,8 @@ export function buildReport(evaluation: Evaluation, flight: Flight): MissionRepo
 
   switch (failure) {
     case 'budget_exceeded':
+      // Only a contract has a budget, so only a contract can go over it.
+      if (budget === null) throw new Error('A design without a budget cannot exceed it');
       return {
         headline: 'Launch scrubbed: over budget',
         summary: `The countdown was stopped before ignition because the mission costs more than the ${formatUsd(budget.maxUsd)} the client can pay.`,
@@ -90,16 +93,21 @@ export function buildReport(evaluation: Evaluation, flight: Flight): MissionRepo
     }
 
     case 'objective_unfulfilled': {
+      // Only a contract has an objective, so only a contract can miss it.
+      const { objective, level } = evaluation;
+      if (objective === null || level === null) {
+        throw new Error('A design without a contract cannot miss its objective');
+      }
       const explanation = [
         `The rocket did its job: it placed the ${payloadNames} in ${lowerFirst(orbit.shortName)} with ${formatSpeed(deltaV.marginMs)} of delta-v in reserve. But a mission only succeeds if it delivers what the client is paying for.`,
       ];
-      if (evaluation.objective.missingHardware.length > 0) {
-        const missing = formatList(evaluation.objective.missingHardware.map((r) => r.label));
+      if (objective.missingHardware.length > 0) {
+        const missing = formatList(objective.missingHardware.map((r) => r.label));
         explanation.push(`The contract needs ${missing}, and the payload does not include it.`);
       }
-      if (!evaluation.objective.orbitAccepted) {
+      if (!objective.orbitAccepted) {
         explanation.push(
-          `${orbit.shortName} does not serve this contract. ${evaluation.level.objective.orbitReason}`,
+          `${orbit.shortName} does not serve this contract. ${level.objective.orbitReason}`,
         );
       }
       return {
@@ -111,17 +119,27 @@ export function buildReport(evaluation: Evaluation, flight: Flight): MissionRepo
       };
     }
 
-    case null:
+    case null: {
+      const { level } = evaluation;
+      const explanation = [
+        budget === null
+          ? `Cost: the mission cost ${formatUsd(totals.totalCostUsd)}. Free exploration has no budget limit, so the cost did not matter this time.`
+          : `Budget: the mission cost ${formatUsd(budget.totalUsd)} of the ${formatUsd(budget.maxUsd)} available.`,
+        `Mass: the payload weighed ${formatMass(mass.payloadKg)}, within the ${formatMass(mass.capacityKg)} that ${rocket.shortName} is rated for.`,
+        `Delta-v: ${lowerFirst(orbit.shortName)} needs ${formatSpeed(deltaV.requiredMs)} and the rocket generated ${formatSpeed(deltaV.budget.totalMs)}. ${stageSentence}`,
+      ];
+      if (level !== null) {
+        explanation.push('Objective: the hardware and the orbit match what the client asked for.');
+      } else if (totals.crew > 0) {
+        const radiation = evaluation.checks.find((check) => check.id === 'radiation');
+        if (radiation) explanation.push(`Crew: ${lowerFirst(radiation.detail)}`);
+      }
       return {
         headline: 'Mission accomplished',
-        summary: `${rocket.shortName} delivered the ${payloadNames} to ${lowerFirst(orbit.shortName)}. ${evaluation.level.epilogue}`,
-        explanation: [
-          `Budget: the mission cost ${formatUsd(budget.totalUsd)} of the ${formatUsd(budget.maxUsd)} available.`,
-          `Mass: the payload weighed ${formatMass(mass.payloadKg)}, within the ${formatMass(mass.capacityKg)} that ${rocket.shortName} is rated for.`,
-          `Delta-v: ${lowerFirst(orbit.shortName)} needs ${formatSpeed(deltaV.requiredMs)} and the rocket generated ${formatSpeed(deltaV.budget.totalMs)}. ${stageSentence}`,
-          'Objective: the hardware and the orbit match what the client asked for.',
-        ],
+        summary: `${rocket.shortName} delivered the ${payloadNames} to ${lowerFirst(orbit.shortName)}. ${level?.epilogue ?? FREE_EXPLORATION.epilogue}`,
+        explanation,
         hints: [],
       };
+    }
   }
 }

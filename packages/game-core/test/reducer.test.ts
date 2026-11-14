@@ -205,7 +205,9 @@ describe('serialization', () => {
 
   it('rejects a state that is not valid', () => {
     const state = createInitialState();
-    expect(() => parseGameState({ ...state, version: 2 })).toThrow();
+    // Version 1 had no play mode.
+    expect(() => parseGameState({ ...state, version: 1 })).toThrow();
+    expect(() => parseGameState({ ...state, mode: 'sandbox' })).toThrow();
     expect(() => parseGameState({ ...state, levelId: 'moon_base' })).toThrow();
     expect(() =>
       parseGameState({ ...state, design: { ...state.design, payloadIds: ['cubesat', 'cubesat'] } }),

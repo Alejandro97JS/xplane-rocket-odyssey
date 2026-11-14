@@ -8,9 +8,9 @@ import {
   isCompleteDesign,
   type DesignTotals,
 } from './design.ts';
-import { LEVEL_IDS, LevelIdSchema, type LevelId } from './ids.ts';
+import { LEVEL_IDS, LevelIdSchema, PlayModeSchema, type LevelId } from './ids.ts';
 
-export const STATE_VERSION = 1;
+export const STATE_VERSION = 2;
 
 const LevelRecordSchema = z.object({
   attempts: z.number().int().nonnegative(),
@@ -26,7 +26,15 @@ export type LevelRecord = z.infer<typeof LevelRecordSchema>;
  */
 export const GameStateSchema = z.object({
   version: z.literal(STATE_VERSION),
-  /** The contract being planned, or null before the player chooses one. */
+  /**
+   * A contract, or free exploration with no contract and no budget. Switching
+   * keeps the design and the chosen contract, so the player can go back.
+   */
+  mode: PlayModeSchema,
+  /**
+   * The contract being planned, or null before the player chooses one. It is
+   * kept, but not used, in free exploration.
+   */
   levelId: LevelIdSchema.nullable(),
   design: DesignSchema,
   /**
@@ -40,7 +48,8 @@ export const GameStateSchema = z.object({
    */
   launch: z
     .object({
-      levelId: LevelIdSchema,
+      /** The contract flown, or null for a flight in free exploration. */
+      levelId: LevelIdSchema.nullable(),
       design: CompleteDesignSchema,
       /** Counts launches, so replaying the same design is still a new launch. */
       sequence: z.number().int().positive(),
@@ -53,6 +62,7 @@ export type GameState = z.infer<typeof GameStateSchema>;
 export function createInitialState(): GameState {
   return {
     version: STATE_VERSION,
+    mode: 'contract',
     levelId: null,
     design: EMPTY_DESIGN,
     budgetWarningDismissedAtUsd: null,
@@ -76,9 +86,24 @@ export interface BudgetStatus {
   readonly over: boolean;
 }
 
-/** Budget of the current contract, or null before one is chosen. */
+export function selectIsFreeExploration(state: GameState): boolean {
+  return state.mode === 'free_exploration';
+}
+
+/**
+ * True when the player knows what to fly: a contract has been chosen, or the
+ * player is in free exploration. Until then the other steps have nothing to plan.
+ */
+export function selectHasMission(state: GameState): boolean {
+  return selectIsFreeExploration(state) || state.levelId !== null;
+}
+
+/**
+ * Budget of the current contract, or null before one is chosen. Free
+ * exploration has no budget, so it is null there too.
+ */
 export function selectBudget(state: GameState): BudgetStatus | null {
-  if (state.levelId === null) return null;
+  if (selectIsFreeExploration(state) || state.levelId === null) return null;
   const maxUsd = getLevel(state.levelId).maxBudgetUsd;
   const spentUsd = computeTotals(state.design).totalCostUsd;
   return { maxUsd, spentUsd, remainingUsd: maxUsd - spentUsd, over: spentUsd > maxUsd };
@@ -111,10 +136,14 @@ export interface Readiness {
   readonly ready: boolean;
 }
 
-/** What is still missing before the mission can be launched. */
+/**
+ * What is still missing before the mission can be launched. Choosing free
+ * exploration counts as choosing the mission.
+ */
 export function selectReadiness(state: GameState): Readiness {
+  const hasMission = selectHasMission(state);
   const items = [
-    { id: 'mission', label: 'Mission', done: state.levelId !== null },
+    { id: 'mission', label: 'Mission', done: hasMission },
     { id: 'payload', label: 'Payload', done: state.design.payloadIds.length > 0 },
     { id: 'orbit', label: 'Orbit', done: state.design.orbitId !== null },
     { id: 'rocket', label: 'Rocket', done: state.design.rocketId !== null },
@@ -123,7 +152,7 @@ export function selectReadiness(state: GameState): Readiness {
   return {
     items,
     progress: done / items.length,
-    ready: state.levelId !== null && isCompleteDesign(state.design),
+    ready: hasMission && isCompleteDesign(state.design),
   };
 }
 
