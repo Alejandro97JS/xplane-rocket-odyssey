@@ -10,3 +10,5 @@ For example, in the use case 1 we want to focus on the launch of a rocket. There
 
 ## Simulation realism
 The launch must look credible, not be a real physics simulation. However, the outcome must depend on the player's parameters through simple deterministic rules (see ai/standards/use_case_1_launch.md), and the animation must show that outcome.
+
+We also want use case 2: ai/standards/use_case_2_orbit.md

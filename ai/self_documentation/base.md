@@ -8,6 +8,8 @@ Approved decisions that later work must follow are written as rules in `ai/stand
 
 The tech stack is approved and defined in `ai/standards/tech_stack.md`. No code has been written yet. Before the first level can be implemented, the launch rules in `ai/standards/use_case_1_launch.md` must be defined; see the open points in [tech_stack.md](tech_stack.md).
 
+We also want use case 2: `ai/standards/use_case_2_orbit.md`
+
 ## Documents
 
 | Document | Contents |
