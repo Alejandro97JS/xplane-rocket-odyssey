@@ -88,7 +88,8 @@ Found while building use case 1 on 2026-11-14. None of them changes the stack.
 
 ## Open points
 
-- The Railway session has expired. The owner must log in before the first deployment, and each deployment needs the owner's confirmation.
+- Railway has deprecated `railway.json` in favour of `.railway/railway.ts` and no longer applies it to new services; the deployment settings were set on the service instead. Replacing `railway.json` changes the standard and needs the owner's approval. See [use_case_1_implementation.md](use_case_1_implementation.md).
+- Each deployment needs the owner's confirmation.
 - The `Dockerfile` has not been built: Docker Desktop was not running. See [use_case_1_implementation.md](use_case_1_implementation.md).
 - The owner judges whether the launch animation looks credible, and a real screen reader pass has to be done by a person.
 - The questions about the launch rules are in [use_case_1_launch_rules.md](use_case_1_launch_rules.md).
