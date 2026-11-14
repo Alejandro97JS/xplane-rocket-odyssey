@@ -1,0 +1,16 @@
+{
+  "name": "@rocket-odyssey/game-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Rules, state and launch simulation. No UI dependencies.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}
