@@ -8,6 +8,8 @@ import { EarthSphere } from './EarthSphere.tsx';
  */
 
 interface OrbitGeometry {
+  /** The part of the 200 x 120 box that holds the drawing: x, y, width, height. */
+  view: [number, number, number, number];
   earth: { cx: number; cy: number; r: number };
   /** The orbit as a tilted ellipse. Its lower half is the side nearest the viewer. */
   ellipse: { cx: number; cy: number; rx: number; ry: number; rotate: number };
@@ -19,30 +21,35 @@ interface OrbitGeometry {
 
 const GEOMETRY: Record<OrbitId, OrbitGeometry> = {
   leo: {
+    view: [46, 12, 108, 100],
     earth: { cx: 100, cy: 62, r: 33 },
     ellipse: { cx: 100, cy: 62, rx: 46, ry: 13, rotate: -16 },
     satellite: 62,
     belts: null,
   },
   sso: {
+    view: [46, 6, 108, 108],
     earth: { cx: 100, cy: 60, r: 31 },
     ellipse: { cx: 100, cy: 60, rx: 49, ry: 14, rotate: -80 },
     satellite: 118,
     belts: null,
   },
   meo: {
+    view: [18, 18, 164, 84],
     earth: { cx: 100, cy: 60, r: 17 },
     ellipse: { cx: 100, cy: 60, rx: 76, ry: 25, rotate: -18 },
     satellite: 55,
     belts: { inner: 1.9, outer: 3.4, rotate: -18 },
   },
   geo: {
+    view: [4, 20, 192, 76],
     earth: { cx: 100, cy: 58, r: 12 },
     ellipse: { cx: 100, cy: 58, rx: 90, ry: 27, rotate: 0 },
     satellite: 90,
     belts: { inner: 2.2, outer: 4.6, rotate: 0 },
   },
   heo: {
+    view: [30, 8, 150, 96],
     earth: { cx: 55.6, cy: 77.3, r: 9 },
     ellipse: { cx: 108, cy: 54, rx: 70, ry: 40, rotate: -24 },
     satellite: 318,
@@ -77,7 +84,7 @@ export function OrbitArt({ orbitId, detailed = false, className }: OrbitArtProps
     <svg
       aria-hidden="true"
       focusable="false"
-      viewBox="0 0 200 120"
+      viewBox={g.view.join(' ')}
       className={className}
       preserveAspectRatio="xMidYMid meet"
     >

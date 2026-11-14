@@ -227,7 +227,9 @@ function objectiveCheck(
     hints.push(HINTS.objective_hardware);
   }
   if (!objective.orbitAccepted) {
-    sentences.push(`${orbit.shortName} does not serve this contract. ${level.objective.orbitReason}`);
+    sentences.push(
+      `${orbit.shortName} does not serve this contract. ${level.objective.orbitReason}`,
+    );
     hints.push(HINTS.objective_orbit);
   }
   return {

@@ -104,7 +104,8 @@ export function buildReport(evaluation: Evaluation, flight: Flight): MissionRepo
       }
       return {
         headline: 'Contract not fulfilled',
-        summary: 'The flight was a success, but the mission does not do what the contract asks for.',
+        summary:
+          'The flight was a success, but the mission does not do what the contract asks for.',
         explanation,
         hints,
       };

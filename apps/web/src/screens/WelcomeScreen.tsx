@@ -35,7 +35,7 @@ export function WelcomeScreen() {
 
   return (
     <main id="main" className="flex flex-1 flex-col justify-center py-4">
-      <Frame tone="panel" className="fade-in overflow-hidden px-5 py-8 sm:px-10 sm:py-12">
+      <Frame tone="panel" className="fade-in px-5 py-8 sm:px-10 sm:py-12">
         <div className="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
           <div>
             <div className="flex items-center gap-4">
@@ -56,7 +56,11 @@ export function WelcomeScreen() {
             </p>
 
             <div className="mt-9 flex flex-wrap items-center gap-4">
-              <ActionButton variant="primary" href={getStep('mission').path} className="!text-2xl !px-9 !min-h-16">
+              <ActionButton
+                variant="primary"
+                href={getStep('mission').path}
+                className="!min-h-16 !px-6 !text-xl sm:!px-9 sm:!text-2xl"
+              >
                 {started ? 'Continue planning' : 'Start mission'}
                 <ChevronRightIcon />
               </ActionButton>
@@ -66,10 +70,16 @@ export function WelcomeScreen() {
             </div>
           </div>
 
-          {/* A rocket on the pad, to set the scene. Hidden on small screens to keep the text first. */}
-          <div aria-hidden="true" className="relative hidden h-[26rem] w-56 lg:block">
-            <div className="absolute inset-x-0 bottom-0 h-3 rounded-full bg-line/40 blur-md" />
-            <RocketSvg rocketId="falcon9" className="absolute inset-0 size-full" />
+          {/* Three launchers at their relative sizes, to set the scene. Hidden on
+              small screens to keep the text first. */}
+          <div
+            aria-hidden="true"
+            className="relative hidden h-[26rem] w-80 items-end justify-center gap-5 lg:flex"
+          >
+            <div className="absolute inset-x-2 bottom-0 h-3 rounded-full bg-line/45 blur-md" />
+            <RocketSvg rocketId="soyuz" className="relative h-[66%] w-20" />
+            <RocketSvg rocketId="falcon9" className="relative h-full w-16" />
+            <RocketSvg rocketId="ariane5" className="relative h-[74%] w-28" />
           </div>
         </div>
 

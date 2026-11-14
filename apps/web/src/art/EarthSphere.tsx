@@ -55,7 +55,15 @@ export function EarthSphere({ cx, cy, r, spin = 0 }: EarthSphereProps) {
         </g>
         <circle cx={cx} cy={cy} r={r} fill={`url(#${id}-night)`} />
       </g>
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#9be5ff" strokeWidth={Math.max(0.6, r * 0.02)} opacity="0.7" />
+      <circle
+        cx={cx}
+        cy={cy}
+        r={r}
+        fill="none"
+        stroke="#9be5ff"
+        strokeWidth={Math.max(0.6, r * 0.02)}
+        opacity="0.7"
+      />
     </g>
   );
 }

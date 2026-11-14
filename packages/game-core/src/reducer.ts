@@ -89,9 +89,7 @@ export function reduce(state: GameState, action: Action): GameState {
             attempts: record.attempts + 1,
             completed: record.completed || score !== null,
             bestScore:
-              score === null
-                ? record.bestScore
-                : Math.max(record.bestScore ?? 0, score.total),
+              score === null ? record.bestScore : Math.max(record.bestScore ?? 0, score.total),
           },
         },
       };

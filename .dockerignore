@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+**/dist
+.git
+.gitignore
+ai
+e2e
+test-results
+playwright-report
+*.md
+Dockerfile
+docker-compose.yml
+railway.json
+.tmp-web-dist-*

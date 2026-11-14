@@ -46,7 +46,7 @@ export function StepNav({ current, canGoNext, nextSlot }: StepNavProps) {
   return (
     <Frame tone="plain" className="mt-5 px-3 py-4 sm:px-6">
       <Stepper current={current} />
-      <div className="mt-4 flex items-center justify-between gap-3">
+      <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
         <ActionButton variant="secondary" href={previous?.path ?? '/'}>
           <ArrowLeftIcon />
           Back

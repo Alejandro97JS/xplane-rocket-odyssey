@@ -36,9 +36,7 @@ export function LoadMeter({ payloadKg, capacityKg, rocketName }: LoadMeterProps)
         style={
           {
             '--bar-line': over ? 'var(--color-warn)' : 'var(--color-line-dim)',
-            '--bar-fill': over
-              ? 'var(--color-warn)'
-              : 'linear-gradient(90deg, #38bdf8, #9be5ff)',
+            '--bar-fill': over ? 'var(--color-warn)' : 'linear-gradient(90deg, #38bdf8, #9be5ff)',
           } as React.CSSProperties
         }
       >

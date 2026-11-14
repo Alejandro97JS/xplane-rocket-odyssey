@@ -50,7 +50,6 @@
     min-height: 100dvh;
     font-family: var(--font-sans);
     color: var(--color-ink);
-    background: var(--color-space-900);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -109,6 +108,13 @@
   .value {
     font-weight: 700;
     color: var(--color-gold-bright);
+    font-variant-numeric: tabular-nums;
+  }
+  /* A large figure. Not uppercase, so units such as kg and km/s keep their case. */
+  .figure {
+    font-style: italic;
+    font-weight: 800;
+    line-height: 1.05;
     font-variant-numeric: tabular-nums;
   }
   .readout {
@@ -340,18 +346,6 @@
   width: 100%;
   height: 100%;
 }
-.backdrop__star--twinkle {
-  animation: twinkle 4.5s ease-in-out infinite;
-}
-@keyframes twinkle {
-  0%,
-  100% {
-    opacity: var(--o, 0.7);
-  }
-  50% {
-    opacity: calc(var(--o, 0.7) * 0.35);
-  }
-}
 /* The Earth: a huge disc of which only the top rim shows. */
 .backdrop__earth {
   position: absolute;
@@ -394,21 +388,6 @@
 @media (max-width: 40rem) {
   .scene {
     aspect-ratio: 4 / 3;
-  }
-}
-
-/* A slow pulse for warnings. One cycle every two seconds: far below the
-   three flashes per second that WCAG 2.3.1 allows. */
-.pulse-slow {
-  animation: pulse-slow 2s ease-in-out infinite;
-}
-@keyframes pulse-slow {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.55;
   }
 }
 

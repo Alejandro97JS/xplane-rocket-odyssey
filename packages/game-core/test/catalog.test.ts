@@ -107,11 +107,7 @@ describe('catalog', () => {
   });
 
   it('marks every orbit above low orbit as a radiation hazard', () => {
-    expect(ORBITS.filter((o) => o.radiationHazard).map((o) => o.id)).toEqual([
-      'meo',
-      'geo',
-      'heo',
-    ]);
+    expect(ORBITS.filter((o) => o.radiationHazard).map((o) => o.id)).toEqual(['meo', 'geo', 'heo']);
   });
 
   it('shields only the heavy capsule', () => {

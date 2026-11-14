@@ -83,7 +83,8 @@ export const ROCKETS: readonly RocketSpec[] = [
     capacityLabel: 'Medium',
     heightM: 46,
     payloadBay: 'fairing',
-    description: 'A workhorse flown since the 1960s. Reliable in low orbit, short of energy for high ones.',
+    description:
+      'A workhorse flown since the 1960s. Reliable in low orbit, short of energy for high ones.',
     stages: [
       {
         name: 'Core stage with boosters',
@@ -92,7 +93,13 @@ export const ROCKETS: readonly RocketSpec[] = [
         ispS: 311,
         burnTimeS: 287,
       },
-      { name: 'Upper stage', dryMassKg: 4_500, propellantMassKg: 26_000, ispS: 359, burnTimeS: 240 },
+      {
+        name: 'Upper stage',
+        dryMassKg: 4_500,
+        propellantMassKg: 26_000,
+        ispS: 359,
+        burnTimeS: 240,
+      },
     ],
   },
   {
@@ -108,7 +115,8 @@ export const ROCKETS: readonly RocketSpec[] = [
     capacityLabel: 'Large',
     heightM: 70,
     payloadBay: 'fairing',
-    description: 'A powerful two-stage launcher. Lifts heavy loads to low orbit and satellites to high orbit.',
+    description:
+      'A powerful two-stage launcher. Lifts heavy loads to low orbit and satellites to high orbit.',
     stages: [
       {
         name: 'First stage',
@@ -139,7 +147,8 @@ export const ROCKETS: readonly RocketSpec[] = [
     capacityLabel: 'Medium',
     heightM: 56,
     payloadBay: 'fairing',
-    description: 'A European launcher with a very efficient hydrogen upper stage, at its best in high orbits.',
+    description:
+      'A European launcher with a very efficient hydrogen upper stage, at its best in high orbits.',
     stages: [
       {
         name: 'Core stage with boosters',
@@ -148,7 +157,13 @@ export const ROCKETS: readonly RocketSpec[] = [
         ispS: 342,
         burnTimeS: 465,
       },
-      { name: 'Upper stage', dryMassKg: 5_000, propellantMassKg: 31_000, ispS: 457, burnTimeS: 720 },
+      {
+        name: 'Upper stage',
+        dryMassKg: 5_000,
+        propellantMassKg: 31_000,
+        ispS: 457,
+        burnTimeS: 720,
+      },
     ],
   },
   {
@@ -164,7 +179,8 @@ export const ROCKETS: readonly RocketSpec[] = [
     capacityLabel: 'Super heavy',
     heightM: 121,
     payloadBay: 'internal',
-    description: 'The largest launcher ever built, designed to carry whole station modules in one flight.',
+    description:
+      'The largest launcher ever built, designed to carry whole station modules in one flight.',
     stages: [
       {
         name: 'Booster (Super Heavy)',
@@ -195,7 +211,8 @@ export const ROCKETS: readonly RocketSpec[] = [
     capacityLabel: 'Large',
     heightM: 52,
     payloadBay: 'fairing',
-    description: 'A heavy European launcher that carried large satellites and station cargo for decades.',
+    description:
+      'A heavy European launcher that carried large satellites and station cargo for decades.',
     stages: [
       {
         name: 'Core stage with boosters',
@@ -204,7 +221,13 @@ export const ROCKETS: readonly RocketSpec[] = [
         ispS: 367,
         burnTimeS: 540,
       },
-      { name: 'Upper stage', dryMassKg: 5_000, propellantMassKg: 28_000, ispS: 446, burnTimeS: 945 },
+      {
+        name: 'Upper stage',
+        dryMassKg: 5_000,
+        propellantMassKg: 28_000,
+        ispS: 446,
+        burnTimeS: 945,
+      },
     ],
   },
   {
@@ -229,7 +252,13 @@ export const ROCKETS: readonly RocketSpec[] = [
         ispS: 367,
         burnTimeS: 550,
       },
-      { name: 'Upper stage', dryMassKg: 35_000, propellantMassKg: 690_000, ispS: 421, burnTimeS: 475 },
+      {
+        name: 'Upper stage',
+        dryMassKg: 35_000,
+        propellantMassKg: 690_000,
+        ispS: 421,
+        burnTimeS: 475,
+      },
     ],
   },
   {
@@ -245,7 +274,8 @@ export const ROCKETS: readonly RocketSpec[] = [
     capacityLabel: 'Large',
     heightM: 56,
     payloadBay: 'internal',
-    description: 'A reusable winged orbiter with a large cargo bay. The most expensive way to reach orbit.',
+    description:
+      'A reusable winged orbiter with a large cargo bay. The most expensive way to reach orbit.',
     stages: [
       {
         name: 'Solid booster pair',

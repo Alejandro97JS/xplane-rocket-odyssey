@@ -49,7 +49,7 @@ export function RocketStep() {
           onChange={(value) =>
             dispatch({ type: 'rocket/select', rocketId: RocketIdSchema.parse(value) })
           }
-          className="grid grid-cols-2 gap-4 md:grid-cols-4"
+          className="grid gap-4 xs:grid-cols-2 md:grid-cols-4"
         >
           {ROCKETS.map((spec) => (
             <RocketCard key={spec.id} rocket={spec} />
@@ -71,7 +71,7 @@ export function RocketStep() {
         </Frame>
 
         <details className="mt-4 rounded-lg border border-line-dim bg-space-800/80 px-4 py-3">
-          <summary className="flex min-h-8 cursor-pointer items-center gap-2 font-bold text-line-bright">
+          <summary className="flex min-h-11 cursor-pointer items-center gap-2 font-bold text-line-bright">
             <InfoIcon />
             How to read a rocket
           </summary>
@@ -115,43 +115,52 @@ function RocketCard({ rocket }: { rocket: RocketSpec }) {
         </div>
         <Tick />
       </div>
-      <RocketSvg rocketId={rocket.id} className="mx-auto my-3 h-44 w-full sm:h-52" />
-      <div id={detailsId} className="mt-auto">
-        <dl className="space-y-0.5">
-          <div>
-            <dt className="label inline">Capacity: </dt>
-            <dd className="inline font-bold text-ink">
-              {rocket.capacityLabel}
-              <span className="font-medium text-ink-soft"> · {formatMass(rocket.maxLeoPayloadKg)}</span>
-            </dd>
-          </div>
-          <div>
-            <dt className="label inline">Launch cost: </dt>
-            <dd className="value inline">{formatUsd(rocket.costUsd)}</dd>
-          </div>
-        </dl>
-        <dl className="mt-2 space-y-0.5 border-t border-line-dim pt-2 text-sm">
-          <div>
-            <dt className="inline text-ink-soft">Propellant: </dt>
-            <dd className="inline font-semibold text-ink tabular-nums">
-              {formatMass(rocket.propellantMassKg)}
-            </dd>
-          </div>
-          <div>
-            <dt className="inline text-ink-soft">Dry mass: </dt>
-            <dd className="inline font-semibold text-ink tabular-nums">
-              {formatMass(rocket.dryMassKg)}
-            </dd>
-          </div>
-          <div>
-            <dt className="inline text-ink-soft">Isp: </dt>
-            <dd className="inline font-semibold text-ink tabular-nums">{rocket.ispS} s</dd>
-          </div>
-          <div>
-            <dt className="inline text-ink-soft">Height: </dt>
-            <dd className="inline font-semibold text-ink tabular-nums">{rocket.heightM} m</dd>
-          </div>
-        </dl>
+      {/* On a narrow screen the drawing sits beside the figures, not above them. */}
+      <div className="mt-2 flex flex-1 gap-3 xs:flex-col xs:gap-0">
+        <RocketSvg
+          rocketId={rocket.id}
+          className="h-40 w-16 flex-none xs:mx-auto xs:my-2 xs:h-44 xs:w-full sm:h-52"
+        />
+        <div id={detailsId} className="min-w-0 flex-1 xs:mt-auto xs:flex-none">
+          <dl className="space-y-0.5">
+            <div>
+              <dt className="label inline">Capacity: </dt>
+              <dd className="inline font-bold text-ink">
+                {rocket.capacityLabel}
+                <span className="font-medium text-ink-soft">
+                  {' '}
+                  · {formatMass(rocket.maxLeoPayloadKg)}
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt className="label inline">Launch cost: </dt>
+              <dd className="value inline">{formatUsd(rocket.costUsd)}</dd>
+            </div>
+          </dl>
+          <dl className="mt-2 space-y-0.5 border-t border-line-dim pt-2 text-sm">
+            <div>
+              <dt className="inline text-ink-soft">Propellant: </dt>
+              <dd className="inline font-semibold text-ink tabular-nums">
+                {formatMass(rocket.propellantMassKg)}
+              </dd>
+            </div>
+            <div>
+              <dt className="inline text-ink-soft">Dry mass: </dt>
+              <dd className="inline font-semibold text-ink tabular-nums">
+                {formatMass(rocket.dryMassKg)}
+              </dd>
+            </div>
+            <div>
+              <dt className="inline text-ink-soft">Isp: </dt>
+              <dd className="inline font-semibold text-ink tabular-nums">{rocket.ispS} s</dd>
+            </div>
+            <div>
+              <dt className="inline text-ink-soft">Height: </dt>
+              <dd className="inline font-semibold text-ink tabular-nums">{rocket.heightM} m</dd>
+            </div>
+          </dl>
+        </div>
       </div>
     </RadioCard>
   );

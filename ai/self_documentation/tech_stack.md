@@ -2,7 +2,7 @@
 
 The stack itself, with its architecture and accessibility rules, is defined in `ai/standards/tech_stack.md`. That file is the one to follow. This document records why the stack was chosen and what was checked. If the two ever differ, the standard is right and this record needs correcting.
 
-**Status:** Proposed on 2026-11-14 and approved by the project owner the same day. Nothing is implemented yet.
+**Status:** Proposed on 2026-11-14 and approved by the project owner the same day. Implemented the same day with use case 1; see [use_case_1_implementation.md](use_case_1_implementation.md).
 
 ## What drove the choice
 
@@ -71,11 +71,24 @@ Checked on 2026-11-14 on the project owner's Windows 11 machine.
 - **Static site only, no server:** rejected. Railway needs a process to serve the files anyway, and our own server costs about the same and gives the future API a home.
 - **Three.js (3D launch):** not chosen for the MVP. It looks more impressive but needs 3D assets and more work for the same gameplay. The renderer is isolated behind the timeline, so it can be swapped later.
 
+## Notes from the implementation
+
+Found while building use case 1 on 2026-11-14. None of them changes the stack.
+
+- **React Router 8** was used as documented for version 7: `createBrowserRouter`, `RouterProvider` from `react-router/dom`, lazy screens. The fallback to version 7 was not needed.
+- **TypeScript 6** no longer includes `@types` packages by default. Each `tsconfig.json` lists the ones it needs in `types`.
+- **Node 24 runs TypeScript directly**, so the server needs no extra tool in development: `node --watch src/index.ts`. For that to work the code uses only syntax that can be erased (`erasableSyntaxOnly`), and relative imports carry the `.ts` extension.
+- **`@hono/node-server` 2:** the `onFound` option of `serveStatic` runs after the response has been created, so headers set in it are lost. The cache header of built assets is set in a middleware of our own, after `next()`.
+- **`serveStatic` resolves its root from the working directory.** The server computes the path of the client build relative to it.
+- **PixiJS 8:** only containers may have children. The scene asks for the WebGL renderer explicitly and is drawn by our own clock, not by the ticker of PixiJS, so that it can be paused and restarted.
+- **Zustand 5** needs selectors that return the same value for the same state. The `useGame` hook subscribes to the whole state and derives values while rendering.
+- **Two small development tools were added** that the stack table does not list: `concurrently`, to run the client and the server together in `npm run dev`, and `globals`, for ESLint.
+- **Fonts** are Exo 2 and Share Tech Mono, served from the build through the `@fontsource` packages. No request leaves for a font service.
+- **`npm audit`** reports 7 moderate advisories in the chain of `typescript-eslint`. They are in development tools only.
+
 ## Open points
 
-These do not affect the stack, but they affect the implementation:
-
-- `ai/standards/use_case_1_launch.md` is empty. The deterministic launch rules are needed before the level can be implemented. Either the owner writes them or the agent proposes them for review.
-- `ai/ui_mockups` is referenced by the standards but does not exist yet. Without it, the interface is designed at the agent's discretion.
-- The Railway session has expired. The owner must log in before the first deployment.
+- The Railway session has expired. The owner must log in before the first deployment, and each deployment needs the owner's confirmation.
+- The `Dockerfile` has not been built: Docker Desktop was not running. See [use_case_1_implementation.md](use_case_1_implementation.md).
 - The owner judges whether the launch animation looks credible, and a real screen reader pass has to be done by a person.
+- The questions about the launch rules are in [use_case_1_launch_rules.md](use_case_1_launch_rules.md).

@@ -89,13 +89,7 @@ export interface TelemetrySample {
 }
 
 export type FlightEnding =
-  | 'scrubbed'
-  | 'breakup'
-  | 'reentry'
-  | 'stranded'
-  | 'radiation'
-  | 'objective_missed'
-  | 'success';
+  'scrubbed' | 'breakup' | 'reentry' | 'stranded' | 'radiation' | 'objective_missed' | 'success';
 
 /** The whole flight, computed before anything is animated. */
 export interface Flight {
@@ -109,6 +103,7 @@ export interface Flight {
 }
 
 const COUNTDOWN_START_S = -10;
+const IGNITION_S = -3;
 /** Altitude where the air becomes thick enough to destroy a falling vehicle. */
 const REENTRY_ALTITUDE_KM = 100;
 /** Altitude of the densest part of the inner Van Allen belt. */
@@ -192,7 +187,7 @@ export function buildFlight(evaluation: Evaluation): Flight {
   phase('countdown', 'Countdown', COUNTDOWN_START_S, 0);
   event(
     'ignition',
-    -3,
+    IGNITION_S,
     'info',
     'Engine ignition',
     'The first stage engines light up and build thrust while the clamps hold the rocket down.',
@@ -204,6 +199,8 @@ export function buildFlight(evaluation: Evaluation): Flight {
     'Liftoff',
     `${rocket.shortName} leaves the pad with ${formatMass(totals.payloadMassKg)} of payload. The whole vehicle weighs ${formatMass(evaluation.deltaV.budget.liftoffMassKg)}, most of it propellant.`,
   );
+  // The engines are off until ignition, then fire while the clamps hold the rocket.
+  sample(IGNITION_S, 0);
   sample(0, 1);
 
   // --- Ascent model ----------------------------------------------------------
@@ -563,8 +560,7 @@ export function buildFlight(evaluation: Evaluation): Flight {
     phase('transfer_coast', 'Coast to apogee', transferCoast.tStart, transferCoast.tEnd);
 
     const beltFraction =
-      1 -
-      (1 - (INNER_BELT_ALTITUDE_KM - insertionAltitudeKm) / climbSpan) ** (1 / CLIMB_EXPONENT);
+      1 - (1 - (INNER_BELT_ALTITUDE_KM - insertionAltitudeKm) / climbSpan) ** (1 / CLIMB_EXPONENT);
     const beltTime =
       transferCoast.tStart + (transferCoast.tEnd - transferCoast.tStart) * beltFraction;
     if (evaluation.radiation.exposedCrew > 0) {
@@ -624,8 +620,7 @@ export function buildFlight(evaluation: Evaluation): Flight {
       );
 
       if (!circularization.complete) {
-        const reachedPerigeeKm =
-          insertionAltitudeKm + climbSpan * circularization.fraction ** 1.6;
+        const reachedPerigeeKm = insertionAltitudeKm + climbSpan * circularization.fraction ** 1.6;
         event(
           'propellant_depleted',
           circularization.tEnd,

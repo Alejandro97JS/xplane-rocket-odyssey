@@ -14,6 +14,7 @@ import { CoinIcon, UsersIcon, WeightIcon } from '../components/icons.tsx';
 import { CheckboxCard, Tick } from '../components/OptionCard.tsx';
 import { StepNav } from '../components/StepNav.tsx';
 import { StepPanel } from '../components/StepPanel.tsx';
+import { cx } from '../lib/cx.ts';
 
 /** Step 2: the payload. Several items can be chosen; their mass and cost add up. */
 export function PayloadStep() {
@@ -49,7 +50,12 @@ export function PayloadStep() {
                       }
                     }
                   }}
-                  className="mt-3 grid gap-4 xs:grid-cols-2 lg:grid-cols-3"
+                  className={cx(
+                    'mt-3 grid gap-4 xs:grid-cols-2',
+                    items.length % 3 === 0 || items.length > 4
+                      ? 'lg:grid-cols-3'
+                      : 'lg:grid-cols-4',
+                  )}
                 >
                   {items.map((payload) => (
                     <PayloadCard key={payload.id} payload={payload} />
@@ -69,18 +75,18 @@ export function PayloadStep() {
           <p className="flex items-center gap-2.5">
             <CoinIcon className="text-gold" width="1.6em" height="1.6em" />
             <span className="label !text-ink">Total cost:</span>
-            <span className="value display text-2xl">{formatUsd(totals.payloadCostUsd)}</span>
+            <span className="value figure text-2xl">{formatUsd(totals.payloadCostUsd)}</span>
           </p>
           <p className="flex items-center gap-2.5">
             <WeightIcon className="text-line-bright" width="1.6em" height="1.6em" />
             <span className="label !text-ink">Total mass:</span>
-            <span className="value display text-2xl">{formatMass(totals.payloadMassKg)}</span>
+            <span className="value figure text-2xl">{formatMass(totals.payloadMassKg)}</span>
           </p>
           {totals.crew > 0 && (
             <p className="flex items-center gap-2.5">
               <UsersIcon className="text-line-bright" width="1.6em" height="1.6em" />
               <span className="label !text-ink">Crew:</span>
-              <span className="value display text-2xl">{totals.crew}</span>
+              <span className="value figure text-2xl">{totals.crew}</span>
             </p>
           )}
         </Frame>

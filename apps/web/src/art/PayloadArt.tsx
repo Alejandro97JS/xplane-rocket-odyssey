@@ -102,7 +102,13 @@ function EarthObservation() {
       <rect x="60" y="28" width="12" height="46" fill={FOIL_LIGHT} opacity="0.8" />
       <rect x="88" y="28" width="12" height="46" fill={FOIL_SHADE} opacity="0.85" />
       <rect x="60" y="28" width="40" height="5" fill={HULL_DARK} />
-      <path d="M72 28V18M72 18l-7-6M72 18l7-6" stroke={HULL} strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path
+        d="M72 28V18M72 18l-7-6M72 18l7-6"
+        stroke={HULL}
+        strokeWidth="2"
+        fill="none"
+        strokeLinecap="round"
+      />
       <rect x="84" y="20" width="10" height="8" fill={HULL} />
     </g>
   );
@@ -158,7 +164,14 @@ function Telecom() {
         <ellipse cx="57" cy="94" rx="10" ry="3.6" fill={HULL_SHADE} transform="rotate(-18 57 94)" />
         <path d="M94 78l6 12" stroke={HULL_DARK} strokeWidth="3" />
         <ellipse cx="103" cy="94" rx="15" ry="6" fill={HULL} transform="rotate(18 103 94)" />
-        <ellipse cx="103" cy="94" rx="10" ry="3.6" fill={HULL_SHADE} transform="rotate(18 103 94)" />
+        <ellipse
+          cx="103"
+          cy="94"
+          rx="10"
+          ry="3.6"
+          fill={HULL_SHADE}
+          transform="rotate(18 103 94)"
+        />
       </g>
     </g>
   );
@@ -203,7 +216,16 @@ function CapsuleSuborbital() {
         <line x1="60" y1="69" x2="100" y2="69" />
         <line x1="64" y1="55" x2="96" y2="55" />
       </g>
-      <rect x="73" y="56" width="14" height="11" rx="3" fill={GLASS} stroke={HULL_DARK} strokeWidth="1.5" />
+      <rect
+        x="73"
+        y="56"
+        width="14"
+        height="11"
+        rx="3"
+        fill={GLASS}
+        stroke={HULL_DARK}
+        strokeWidth="1.5"
+      />
       <rect x="75" y="58" width="4" height="3" rx="1" fill={CYAN} />
       <rect x="69" y="26" width="22" height="14" fill={HULL_SHADE} />
       <rect x="69" y="26" width="7" height="14" fill={HULL} />
@@ -252,8 +274,26 @@ function CapsuleModern() {
       <path d="M54 62C56 32 70 12 80 12C72 26 66 42 65 62Z" fill="#ffffff" opacity="0.85" />
       <path d="M96 62C96 40 90 22 80 12C90 12 104 32 106 62Z" fill={HULL_SHADE} />
       <path d="M72 20h16" stroke={HULL_DARK} strokeWidth="1.300" />
-      <rect x="68" y="34" width="9" height="10" rx="2.500" fill={GLASS} stroke={HULL_DARK} strokeWidth="1.300" />
-      <rect x="83" y="34" width="9" height="10" rx="2.500" fill={GLASS} stroke={HULL_DARK} strokeWidth="1.300" />
+      <rect
+        x="68"
+        y="34"
+        width="9"
+        height="10"
+        rx="2.500"
+        fill={GLASS}
+        stroke={HULL_DARK}
+        strokeWidth="1.300"
+      />
+      <rect
+        x="83"
+        y="34"
+        width="9"
+        height="10"
+        rx="2.500"
+        fill={GLASS}
+        stroke={HULL_DARK}
+        strokeWidth="1.300"
+      />
       <ellipse cx="62" cy="54" rx="3" ry="4" fill={DARK} />
       <ellipse cx="98" cy="54" rx="3" ry="4" fill={DARK} />
     </g>
@@ -282,9 +322,30 @@ function CapsuleShielded() {
         <line x1="63" y1="33" x2="97" y2="33" />
       </g>
       {/* Shield emblem */}
-      <path d="M80 28l9 3.500v7.500c0 6-4 9.500-9 11.500c-5-2-9-5.500-9-11.500v-7.500z" fill={GLASS} stroke={CYAN} strokeWidth="1.800" />
-      <path d="M76 39.500l3 3 5.500-6" fill="none" stroke={CYAN} strokeWidth="1.800" strokeLinecap="round" strokeLinejoin="round" />
-      <rect x="45" y="59" width="70" height="8" rx="2" fill={DARK} stroke={CYAN} strokeWidth="1.400" />
+      <path
+        d="M80 28l9 3.500v7.500c0 6-4 9.500-9 11.500c-5-2-9-5.500-9-11.500v-7.500z"
+        fill={GLASS}
+        stroke={CYAN}
+        strokeWidth="1.800"
+      />
+      <path
+        d="M76 39.500l3 3 5.500-6"
+        fill="none"
+        stroke={CYAN}
+        strokeWidth="1.800"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <rect
+        x="45"
+        y="59"
+        width="70"
+        height="8"
+        rx="2"
+        fill={DARK}
+        stroke={CYAN}
+        strokeWidth="1.400"
+      />
     </g>
   );
 }
@@ -317,11 +378,25 @@ function StationLab() {
   return (
     <g>
       {/* Experiment pallet on top */}
-      <path d="M118 22v-9M118 13l-6-5M118 13l6-5" stroke={HULL} strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path
+        d="M118 22v-9M118 13l-6-5M118 13l6-5"
+        stroke={HULL}
+        strokeWidth="2"
+        fill="none"
+        strokeLinecap="round"
+      />
       <rect x="66" y="22" width="60" height="12" fill={FOIL} />
       <rect x="66" y="22" width="60" height="3.500" fill={FOIL_LIGHT} />
       <rect x="72" y="14" width="12" height="8" fill={HULL_DARK} />
-      <rect x="90" y="16" width="16" height="6" fill={CELL} stroke={CELL_LINE} strokeWidth="0.800" />
+      <rect
+        x="90"
+        y="16"
+        width="16"
+        height="6"
+        fill={CELL}
+        stroke={CELL_LINE}
+        strokeWidth="0.800"
+      />
       {/* Pressurised cylinder */}
       <polygon points="22,40 8,48 8,62 22,70" fill={HULL_SHADE} />
       <rect x="138" y="45" width="12" height="20" fill={HULL_DARK} />
@@ -364,7 +439,7 @@ function StationHabitat() {
         <g key={cx}>
           <circle cx={cx} cy="55" r="7.500" fill={HULL_DARK} />
           <circle cx={cx} cy="55" r="5.500" fill="#ffdc6b" />
-          <circle cx={cx - 1.500} cy="53.500" r="1.800" fill="#fff6d6" />
+          <circle cx={cx - 1.5} cy="53.500" r="1.800" fill="#fff6d6" />
         </g>
       ))}
     </g>

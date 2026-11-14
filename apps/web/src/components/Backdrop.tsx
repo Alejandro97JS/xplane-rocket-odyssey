@@ -6,8 +6,6 @@ interface Star {
   y: number;
   r: number;
   opacity: number;
-  twinkle: boolean;
-  delay: number;
 }
 
 function createStars(count: number): Star[] {
@@ -19,13 +17,15 @@ function createStars(count: number): Star[] {
       y: random() * 100,
       r: size > 0.94 ? 0.16 : size > 0.7 ? 0.1 : 0.06,
       opacity: 0.35 + random() * 0.6,
-      twinkle: random() > 0.82,
-      delay: random() * 4.5,
     };
   });
 }
 
-/** Deep space, a field of stars and the rim of the Earth, behind every screen. */
+/**
+ * Deep space, a field of stars and the rim of the Earth, behind every screen.
+ * It is still on purpose: a backdrop that keeps moving would need a way to
+ * pause it (WCAG 2.2.2).
+ */
 export function Backdrop() {
   const stars = useMemo(() => createStars(170), []);
   return (
@@ -44,12 +44,6 @@ export function Backdrop() {
             r={star.r}
             fill="#dcecff"
             opacity={star.opacity}
-            className={star.twinkle ? 'backdrop__star--twinkle' : undefined}
-            style={
-              star.twinkle
-                ? ({ '--o': star.opacity, animationDelay: `${star.delay}s` } as React.CSSProperties)
-                : undefined
-            }
           />
         ))}
       </svg>

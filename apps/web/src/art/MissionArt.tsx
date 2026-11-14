@@ -9,9 +9,22 @@ import { PayloadGlyph } from './PayloadArt.tsx';
  */
 
 const STARS: [number, number, number][] = [
-  [18, 20, 1.1], [44, 62, 0.7], [70, 14, 0.9], [96, 44, 0.6], [128, 10, 1], [150, 70, 0.6],
-  [182, 26, 0.8], [214, 12, 1.1], [240, 58, 0.7], [268, 22, 0.9], [296, 46, 1], [306, 12, 0.6],
-  [30, 96, 0.6], [286, 86, 0.7], [112, 86, 0.5], [200, 92, 0.6],
+  [18, 20, 1.1],
+  [44, 62, 0.7],
+  [70, 14, 0.9],
+  [96, 44, 0.6],
+  [128, 10, 1],
+  [150, 70, 0.6],
+  [182, 26, 0.8],
+  [214, 12, 1.1],
+  [240, 58, 0.7],
+  [268, 22, 0.9],
+  [296, 46, 1],
+  [306, 12, 0.6],
+  [30, 96, 0.6],
+  [286, 86, 0.7],
+  [112, 86, 0.5],
+  [200, 92, 0.6],
 ];
 
 function Sky({ id, tint }: { id: string; tint: string }) {
@@ -65,7 +78,14 @@ function EnvironmentalSurveillance({ id }: { id: string }) {
         <circle cx="232" cy="122" r="6" fill="#ffb347" />
         <circle cx="252" cy="130" r="9" fill="#ff7c1f" opacity="0.35" />
         <circle cx="252" cy="130" r="4" fill="#ffb347" />
-        <path d="M228 114q-10-16 4-30" stroke="#a7b3c8" strokeWidth="6" strokeLinecap="round" fill="none" opacity="0.4" />
+        <path
+          d="M228 114q-10-16 4-30"
+          stroke="#a7b3c8"
+          strokeWidth="6"
+          strokeLinecap="round"
+          fill="none"
+          opacity="0.4"
+        />
       </g>
       {/* Scan swath from the camera to the ground */}
       <polygon points="138,74 176,132 268,120" fill="#38bdf8" opacity="0.2" />
@@ -87,7 +107,17 @@ function ConnectingTheContinent({ id }: { id: string }) {
         <polygon points="214,62 36,118 76,142" opacity="0.14" />
       </g>
       <EarthSphere cx={70} cy={124} r={68} spin={10} />
-      <ellipse cx="82" cy="112" rx="34" ry="20" fill="none" stroke="#9be5ff" strokeWidth="1.400" strokeDasharray="4 3" transform="rotate(-18 82 112)" />
+      <ellipse
+        cx="82"
+        cy="112"
+        rx="34"
+        ry="20"
+        fill="none"
+        stroke="#9be5ff"
+        strokeWidth="1.400"
+        strokeDasharray="4 3"
+        transform="rotate(-18 82 112)"
+      />
       <g fill="#ffdc6b">
         <circle cx="66" cy="104" r="2.200" />
         <circle cx="88" cy="118" r="2.200" />
@@ -114,7 +144,13 @@ function HumanHorizon({ id }: { id: string }) {
       </defs>
       <circle cx="252" cy="126" r="70" fill={`url(#${id}-sun)`} />
       <EarthSphere cx={150} cy={440} r={316} spin={50} />
-      <path d="M130 124Q252 100 320 132" stroke="#fff3b0" strokeWidth="2" fill="none" opacity="0.8" />
+      <path
+        d="M130 124Q252 100 320 132"
+        stroke="#fff3b0"
+        strokeWidth="2"
+        fill="none"
+        opacity="0.8"
+      />
       <g transform="translate(40 2) rotate(-10 80 55) scale(1.02)">
         <PayloadGlyph payloadId="capsule_classic" />
       </g>

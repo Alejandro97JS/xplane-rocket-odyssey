@@ -42,8 +42,8 @@ export function BudgetWarningDialog({
           </Heading>
           <p className="mt-4 text-lg text-ink">
             This design costs <strong className="value">{formatUsd(budget.spentUsd)}</strong>, which
-            is <strong className="text-stop">{formatUsd(-budget.remainingUsd)}</strong> more than the{' '}
-            {formatUsd(budget.maxUsd)} the client can pay.
+            is <strong className="text-stop">{formatUsd(-budget.remainingUsd)}</strong> more than
+            the {formatUsd(budget.maxUsd)} the client can pay.
           </p>
           <p className="mt-3 text-ink-soft">
             The agency will not fund a mission that costs more than its budget. You can keep
@@ -54,6 +54,8 @@ export function BudgetWarningDialog({
             <ActionButton variant="secondary" onPress={onContinue}>
               Continue anyway
             </ActionButton>
+            {/* An alert dialog should open with focus on its safest action. */}
+            {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
             <ActionButton variant="primary" onPress={onReview} autoFocus>
               Review my choices
             </ActionButton>

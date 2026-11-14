@@ -15,16 +15,14 @@ export function AppHeader({
 }: AppHeaderProps) {
   return (
     <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 pb-5">
-      <Link
-        href="/"
-        aria-label="Rocket Odyssey, back to the title screen"
-        className="flex items-center gap-4 rounded-xl no-underline"
-      >
+      {/* The name of the link is its visible text, plus where it leads. */}
+      <Link href="/" className="flex items-center gap-4 rounded-xl no-underline">
         <Logo size={64} className="flex-none drop-shadow-[0_0_10px_rgb(56_189_248/0.5)]" />
         <span aria-hidden="true" className="h-12 w-px bg-line-dim max-xs:hidden" />
         <span className="min-w-0">
           <span className="display block text-xl text-ink sm:text-2xl">Space Mission Planner</span>
           <span className="block text-sm text-ink-soft sm:text-base">{tagline}</span>
+          <span className="sr-only"> Back to the title screen.</span>
         </span>
       </Link>
       {children}

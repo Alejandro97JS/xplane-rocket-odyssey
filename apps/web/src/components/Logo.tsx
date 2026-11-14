@@ -65,7 +65,10 @@ export function Logo({ size = 64, className }: LogoProps) {
         <path d="M54 88 L60 104 L66 88 Z" fill={`url(#${id}-flame)`} />
         <path d="M49 70 L39 86 L50 82 Z" fill="#ffc533" />
         <path d="M71 70 L81 86 L70 82 Z" fill="#ffc533" />
-        <path d="M60 20 C 70 32, 72 48, 72 62 L72 84 L48 84 L48 62 C 48 48, 50 32, 60 20 Z" fill="#f1f7ff" />
+        <path
+          d="M60 20 C 70 32, 72 48, 72 62 L72 84 L48 84 L48 62 C 48 48, 50 32, 60 20 Z"
+          fill="#f1f7ff"
+        />
         <path d="M60 20 C 66 27, 69 36, 70.6 45 L49.4 45 C 51 36, 54 27, 60 20 Z" fill="#ff7c89" />
         <circle cx="60" cy="58" r="6.5" fill="#0b2f78" stroke="#38bdf8" strokeWidth="2.5" />
         <rect x="48" y="78" width="24" height="6" fill="#9fb4d4" />

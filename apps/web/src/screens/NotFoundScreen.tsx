@@ -9,7 +9,11 @@ export function NotFoundScreen() {
     <>
       <AppHeader />
       <main id="main" className="flex-1">
-        <StepPanel badge="?" title="Lost in space" subtitle="This page is not on any of our star charts.">
+        <StepPanel
+          badge="?"
+          title="Lost in space"
+          subtitle="This page is not on any of our star charts."
+        >
           <p className="mb-6 text-lg text-ink-soft">
             The address may be wrong, or the page may have moved. Mission control can take you back.
           </p>

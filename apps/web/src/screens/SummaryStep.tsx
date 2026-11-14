@@ -21,13 +21,7 @@ import { getStep, type StepId } from '../app/steps.ts';
 import { RocketSvg } from '../art/RocketSvg.tsx';
 import { ActionButton } from '../components/ActionButton.tsx';
 import { Frame } from '../components/Frame.tsx';
-import {
-  AlertIcon,
-  BoxIcon,
-  OrbitIcon,
-  RocketIcon,
-  TargetIcon,
-} from '../components/icons.tsx';
+import { AlertIcon, BoxIcon, OrbitIcon, RocketIcon, TargetIcon } from '../components/icons.tsx';
 import { LoadMeter } from '../components/LoadMeter.tsx';
 import { StepNav } from '../components/StepNav.tsx';
 import { StepPanel } from '../components/StepPanel.tsx';
@@ -124,11 +118,7 @@ export function SummaryStep() {
 
             <SummaryRow
               icon={
-                rocket ? (
-                  <RocketSvg rocketId={rocket.id} className="h-16 w-8" />
-                ) : (
-                  <RocketIcon />
-                )
+                rocket ? <RocketSvg rocketId={rocket.id} className="h-16 w-8" /> : <RocketIcon />
               }
               label="Rocket"
               step="rocket"
@@ -299,7 +289,7 @@ export function SummaryStep() {
       <StepNav
         current="summary"
         nextSlot={
-          <div className="flex flex-col items-end gap-1">
+          <div className="ml-auto flex flex-col items-end gap-1">
             <p id="launch-caption" className="text-sm font-semibold text-go">
               Press to initiate mission
             </p>
@@ -307,7 +297,7 @@ export function SummaryStep() {
               variant="launch"
               onPress={launch}
               aria-describedby="launch-caption"
-              className="!min-h-14 !px-8 !text-2xl"
+              className="!min-h-14 !px-5 !text-xl sm:!px-8 sm:!text-2xl"
             >
               <RocketIcon />
               Launch!
@@ -328,8 +318,11 @@ interface SummaryRowProps {
 
 function SummaryRow({ icon, label, step, children }: SummaryRowProps) {
   return (
-    <li className="grid grid-cols-[2.5rem_1fr_auto] items-center gap-x-3 py-3">
-      <span aria-hidden="true" className="grid place-items-center text-2xl text-line-bright">
+    <li className="grid grid-cols-[2rem_1fr] items-center gap-x-3 py-3 sm:grid-cols-[2.5rem_1fr_auto]">
+      <span
+        aria-hidden="true"
+        className="row-span-2 grid place-items-center self-start pt-1 text-2xl text-line-bright sm:row-span-1 sm:self-center sm:pt-0"
+      >
         {icon}
       </span>
       <div className="min-w-0">
@@ -339,7 +332,7 @@ function SummaryRow({ icon, label, step, children }: SummaryRowProps) {
       <Link
         href={getStep(step).path}
         aria-label={`Change ${label.toLowerCase()}`}
-        className="grid min-h-11 min-w-11 place-items-center rounded-lg px-2 font-bold text-line-bright underline underline-offset-4"
+        className="col-start-2 grid min-h-11 min-w-11 place-items-center justify-self-start rounded-lg font-bold text-line-bright underline underline-offset-4 sm:col-start-3 sm:justify-self-auto sm:px-2"
       >
         Change
       </Link>

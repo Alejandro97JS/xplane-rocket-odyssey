@@ -71,10 +71,7 @@ describe('reduce', () => {
   });
 
   it('keeps the design when the contract changes', () => {
-    const state = play([
-      ...LEVEL_1_WIN,
-      { type: 'level/select', levelId: 'human_horizon' },
-    ]);
+    const state = play([...LEVEL_1_WIN, { type: 'level/select', levelId: 'human_horizon' }]);
     expect(state.levelId).toBe('human_horizon');
     expect(state.design.payloadIds).toEqual(['cubesat']);
     expect(state.design.rocketId).toBe('electron');

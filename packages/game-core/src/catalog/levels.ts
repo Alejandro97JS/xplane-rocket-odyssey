@@ -88,9 +88,7 @@ export const LEVELS: readonly LevelSpec[] = [
     maxBudgetUsd: 190 * M,
     goal: 'Keep a whole continent connected, without interruptions.',
     objective: {
-      hardware: [
-        { id: 'telecom', label: 'a telecommunications satellite', anyOf: ['telecom'] },
-      ],
+      hardware: [{ id: 'telecom', label: 'a telecommunications satellite', anyOf: ['telecom'] }],
       orbits: ['geo', 'heo'],
       orbitReason:
         'A satellite in a low or medium orbit crosses the sky in minutes, so it cannot serve one continent without interruptions. Geostationary and high elliptical orbits keep it over the region for hours.',

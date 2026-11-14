@@ -35,11 +35,11 @@ export function MissionStep() {
           {/* The group lays its cards out in the grid of its parent, next to the briefing. */}
           <RadioGroup
             aria-label="Mission"
-          value={levelId}
-          onChange={(value) => {
-            setShowError(false);
-            dispatch({ type: 'level/select', levelId: LevelIdSchema.parse(value) });
-          }}
+            value={levelId}
+            onChange={(value) => {
+              setShowError(false);
+              dispatch({ type: 'level/select', levelId: LevelIdSchema.parse(value) });
+            }}
             className="contents"
           >
             {LEVELS.map((level) => (
@@ -59,7 +59,8 @@ export function MissionStep() {
                 <p className="mt-2 text-ink-soft">{selected.statement}</p>
                 <p className="mt-auto flex items-center gap-2 pt-3 text-ink">
                   <CoinIcon className="text-gold" />
-                  Maximum budget: <strong className="value">{formatUsd(selected.maxBudgetUsd)}</strong>
+                  Maximum budget:{' '}
+                  <strong className="value">{formatUsd(selected.maxBudgetUsd)}</strong>
                 </p>
               </>
             ) : (
@@ -103,7 +104,11 @@ function MissionCard({ level }: { level: LevelSpec }) {
   const record = useGame((state) => selectRecord(state, level.id));
   const detailsId = `mission-${level.id}-details`;
   return (
-    <RadioCard value={level.id} name={`Mission ${level.number}: ${level.title}`} describedBy={detailsId}>
+    <RadioCard
+      value={level.id}
+      name={`Mission ${level.number}: ${level.title}`}
+      describedBy={detailsId}
+    >
       <div className="relative m-[3px] overflow-hidden [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_100%,0_100%,0_10px)]">
         <MissionArt levelId={level.id} className="block aspect-[2/1] w-full" />
         <div className="absolute right-2.5 top-2.5">

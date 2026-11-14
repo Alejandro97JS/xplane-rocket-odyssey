@@ -18,7 +18,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "typecheck": "npm run typecheck --workspaces",
+    "typecheck": "npm run typecheck --workspaces && tsc --project e2e/tsconfig.json --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

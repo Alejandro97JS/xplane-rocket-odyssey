@@ -31,10 +31,7 @@ describe('computeDeltaV', () => {
       stage2.ispS * G0 * Math.log(stage2Start / stage2End),
       6,
     );
-    expect(budget.totalMs).toBeCloseTo(
-      budget.stages[0].deltaVMs + budget.stages[1].deltaVMs,
-      6,
-    );
+    expect(budget.totalMs).toBeCloseTo(budget.stages[0].deltaVMs + budget.stages[1].deltaVMs, 6);
     // The second stage ends with only its own structure and the payload.
     expect(stage2End).toBe(payload + stage2.dryMassKg);
   });

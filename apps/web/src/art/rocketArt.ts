@@ -10,7 +10,15 @@ import type { RocketId } from '@rocket-odyssey/game-core';
 
 export type Shape =
   | { kind: 'poly'; pts: number[]; fill: string; opacity?: number }
-  | { kind: 'ellipse'; cx: number; cy: number; rx: number; ry: number; fill: string; opacity?: number };
+  | {
+      kind: 'ellipse';
+      cx: number;
+      cy: number;
+      rx: number;
+      ry: number;
+      fill: string;
+      opacity?: number;
+    };
 
 export interface Engine {
   /** Centre of the nozzle exit. */
@@ -33,9 +41,12 @@ export interface RocketArt {
   upperFront: Shape[];
   /** Nose fairing in two halves, or null when the payload rides inside the vehicle. */
   fairing: { left: Shape[]; right: Shape[] } | null;
-  /** Height where the nose (fairing or capsule) starts. */
+  /**
+   * Height where the payload sits: the base of the fairing or capsule or,
+   * when the payload rides inside the vehicle, the cargo bay.
+   */
   noseBaseY: number;
-  /** Diameter of the vehicle where the nose starts. */
+  /** Diameter of the vehicle at that height. */
   noseBaseDiameter: number;
   /** Height where the two parts come apart. */
   separationY: number;
@@ -150,8 +161,14 @@ function fairingHalf(
 }
 
 const bell = (cx: number, yTop: number, w: number, h: number): Shape[] => [
-  poly([cx - w * 0.28, yTop, cx + w * 0.28, yTop, cx + w / 2, yTop - h, cx - w / 2, yTop - h], NOZZLE),
-  poly([cx + w * 0.08, yTop, cx + w * 0.28, yTop, cx + w / 2, yTop - h, cx + w * 0.16, yTop - h], NOZZLE_DARK),
+  poly(
+    [cx - w * 0.28, yTop, cx + w * 0.28, yTop, cx + w / 2, yTop - h, cx - w / 2, yTop - h],
+    NOZZLE,
+  ),
+  poly(
+    [cx + w * 0.08, yTop, cx + w * 0.28, yTop, cx + w / 2, yTop - h, cx + w * 0.16, yTop - h],
+    NOZZLE_DARK,
+  ),
 ];
 
 const band = (cx: number, y0: number, y1: number, d: number, fill: string) =>
@@ -206,7 +223,10 @@ function soyuz(): RocketArt {
       ...bell(x + 0.55, 1.2, 0.8, 1.2),
       ...section(x, 1.2, 15.5, 2.68, 1.5, GREY),
       // The tip leans towards the core.
-      poly([x - 0.75, 15.5, x + 0.75, 15.5, x - side * 0.55, 20.8], side === -1 ? GREY.base : GREY.dark),
+      poly(
+        [x - 0.75, 15.5, x + 0.75, 15.5, x - side * 0.55, 20.8],
+        side === -1 ? GREY.base : GREY.dark,
+      ),
       band(x, 1.2, 2.6, 2.68, '#d8742a'),
     ];
   };
@@ -318,10 +338,7 @@ function ariane6(): RocketArt {
     band(0, 21, 21.6, d, '#38bdf8'),
     ...tube(0, 33, 35, d, BLACK),
   ];
-  const upperBack: Shape[] = [
-    ...bell(0, 35, 2.4, 1.8),
-    ...tube(0, 35, 41, d, WHITE),
-  ];
+  const upperBack: Shape[] = [...bell(0, 35, 2.4, 1.8), ...tube(0, 35, 41, d, WHITE)];
   return {
     id: 'ariane6',
     height: 56,
@@ -361,7 +378,16 @@ function starship(): RocketArt {
   ];
   const flap = (side: -1 | 1, y0: number, y1: number, reach: number) =>
     poly(
-      [side * 4.5, y0, side * (4.5 + reach), y0 + 1, side * (4.5 + reach), y1 - 2.5, side * 4.5, y1],
+      [
+        side * 4.5,
+        y0,
+        side * (4.5 + reach),
+        y0 + 1,
+        side * (4.5 + reach),
+        y1 - 2.5,
+        side * 4.5,
+        y1,
+      ],
       BLACK.base,
     );
   const upperBack: Shape[] = [
@@ -375,10 +401,18 @@ function starship(): RocketArt {
     // Heat shield tiles on the shaded side.
     rect(1.2, 71, 4.5, 104, BLACK.base, 0.85),
     poly(
-      [1.2, 104, 4.5, 104, ...[0.2, 0.4, 0.6, 0.8, 1].flatMap((t) => [
-        Math.max(1.2 * (1 - t), 4.5 * noseProfile(t)),
-        104 + 17 * t,
-      ]), 0, 121],
+      [
+        1.2,
+        104,
+        4.5,
+        104,
+        ...[0.2, 0.4, 0.6, 0.8, 1].flatMap((t) => [
+          Math.max(1.2 * (1 - t), 4.5 * noseProfile(t)),
+          104 + 17 * t,
+        ]),
+        0,
+        121,
+      ],
       BLACK.base,
       0.85,
     ),
@@ -391,7 +425,7 @@ function starship(): RocketArt {
     upperBack,
     upperFront: [],
     fairing: null,
-    noseBaseY: 104,
+    noseBaseY: 94,
     noseBaseDiameter: d,
     separationY: 71,
     enginesLower: [-3.2, -1.6, 0, 1.6, 3.2].map((x) => ({ x, y: 0, w: 1.4 })),
@@ -421,10 +455,7 @@ function ariane5(): RocketArt {
     band(0, 23.5, 24.1, d, '#ffc533'),
     ...tube(0, 30.5, 31.6, d, BLACK),
   ];
-  const upperBack: Shape[] = [
-    ...bell(0, 31.6, 1.8, 1.5),
-    ...tube(0, 31.6, 35.2, d, WHITE),
-  ];
+  const upperBack: Shape[] = [...bell(0, 31.6, 1.8, 1.5), ...tube(0, 31.6, 35.2, d, WHITE)];
   return {
     id: 'ariane5',
     height: 52,
@@ -542,8 +573,8 @@ function shuttle(): RocketArt {
     upperBack: tank,
     upperFront: orbiter,
     fairing: null,
-    noseBaseY: 38,
-    noseBaseDiameter: 8.4,
+    noseBaseY: 16,
+    noseBaseDiameter: 5.2,
     separationY: 4,
     enginesLower: [
       { x: -6.05, y: 0, w: 4.2 },
@@ -584,7 +615,11 @@ export function getRocketArt(id: RocketId): RocketArt {
  * A crew capsule with its launch escape tower, drawn in place of the fairing
  * when the payload is only a capsule. Returns shapes whose base is at y = 0.
  */
-export function buildCapsuleNose(diameter: number): { capsule: Shape[]; tower: Shape[]; height: number } {
+export function buildCapsuleNose(diameter: number): {
+  capsule: Shape[];
+  tower: Shape[];
+  height: number;
+} {
   const d = diameter;
   const serviceTop = d * 0.45;
   const capsuleTop = serviceTop + d * 0.62;
@@ -594,12 +629,43 @@ export function buildCapsuleNose(diameter: number): { capsule: Shape[]; tower: S
     band(0, serviceTop - d * 0.06, serviceTop, d * 0.98, BLACK.base),
     ...section(0, serviceTop, capsuleTop, d * 0.98, d * 0.42, WHITE),
     // Window.
-    { kind: 'ellipse', cx: -d * 0.12, cy: serviceTop + d * 0.3, rx: d * 0.07, ry: d * 0.08, fill: '#0b2f78' },
+    {
+      kind: 'ellipse',
+      cx: -d * 0.12,
+      cy: serviceTop + d * 0.3,
+      rx: d * 0.07,
+      ry: d * 0.08,
+      fill: '#0b2f78',
+    },
   ];
   const tower: Shape[] = [
     // Lattice legs and the escape motor.
-    poly([-d * 0.2, capsuleTop, -d * 0.15, capsuleTop, -d * 0.04, capsuleTop + d * 0.3, -d * 0.08, capsuleTop + d * 0.3], BLACK.light),
-    poly([d * 0.2, capsuleTop, d * 0.15, capsuleTop, d * 0.04, capsuleTop + d * 0.3, d * 0.08, capsuleTop + d * 0.3], BLACK.light),
+    poly(
+      [
+        -d * 0.2,
+        capsuleTop,
+        -d * 0.15,
+        capsuleTop,
+        -d * 0.04,
+        capsuleTop + d * 0.3,
+        -d * 0.08,
+        capsuleTop + d * 0.3,
+      ],
+      BLACK.light,
+    ),
+    poly(
+      [
+        d * 0.2,
+        capsuleTop,
+        d * 0.15,
+        capsuleTop,
+        d * 0.04,
+        capsuleTop + d * 0.3,
+        d * 0.08,
+        capsuleTop + d * 0.3,
+      ],
+      BLACK.light,
+    ),
     ...tube(0, capsuleTop + d * 0.28, towerTop - d * 0.14, d * 0.17, WHITE),
     poly([-d * 0.085, towerTop - d * 0.14, d * 0.085, towerTop - d * 0.14, 0, towerTop], '#ff7c89'),
   ];
@@ -615,7 +681,10 @@ export function buildStowedPayload(diameter: number, height: number): Shape[] {
   const bodyTop = height * 0.72;
   return [
     // Adapter cone.
-    poly([-diameter * 0.42, 0, diameter * 0.42, 0, d * 0.45, height * 0.14, -d * 0.45, height * 0.14], GREY.dark),
+    poly(
+      [-diameter * 0.42, 0, diameter * 0.42, 0, d * 0.45, height * 0.14, -d * 0.45, height * 0.14],
+      GREY.dark,
+    ),
     rect(-d / 2, height * 0.14, d / 2, bodyTop, '#d9a53a'),
     rect(-d / 2, height * 0.14, -d * 0.2, bodyTop, '#f1cc6f', 0.8),
     rect(d * 0.18, height * 0.14, d / 2, bodyTop, '#a6761d', 0.85),
@@ -623,6 +692,18 @@ export function buildStowedPayload(diameter: number, height: number): Shape[] {
     rect(-d * 0.66, height * 0.2, -d * 0.52, bodyTop * 0.94, '#1e4fa8'),
     rect(d * 0.52, height * 0.2, d * 0.66, bodyTop * 0.94, '#153a80'),
     // Antenna dish on top.
-    poly([-d * 0.3, bodyTop, d * 0.3, bodyTop, d * 0.12, bodyTop + height * 0.1, -d * 0.12, bodyTop + height * 0.1], WHITE.base),
+    poly(
+      [
+        -d * 0.3,
+        bodyTop,
+        d * 0.3,
+        bodyTop,
+        d * 0.12,
+        bodyTop + height * 0.1,
+        -d * 0.12,
+        bodyTop + height * 0.1,
+      ],
+      WHITE.base,
+    ),
   ];
 }

@@ -101,7 +101,11 @@ export function selectNeedsBudgetWarning(state: GameState): boolean {
 export type ReadinessItemId = 'mission' | 'payload' | 'orbit' | 'rocket';
 
 export interface Readiness {
-  readonly items: readonly { readonly id: ReadinessItemId; readonly label: string; readonly done: boolean }[];
+  readonly items: readonly {
+    readonly id: ReadinessItemId;
+    readonly label: string;
+    readonly done: boolean;
+  }[];
   /** 0 to 1. */
   readonly progress: number;
   readonly ready: boolean;
