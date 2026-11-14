@@ -26,7 +26,9 @@ test.describe('use case 1: launch', () => {
 
     await page.getByRole('link', { name: 'Skip to debrief' }).click();
     await expect(page.getByRole('heading', { name: 'Mission accomplished' })).toBeVisible();
-    await expect(page.getByText('Score: 95 / 100')).toBeVisible();
+    await expect(page.getByText('Score: 100 / 100')).toBeVisible();
+    await expect(page.getByText('Best possible design for this contract')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Improve the score' })).toHaveCount(0);
     await expect(page.getByText('Budget: passed')).toBeVisible();
     await expect(page.getByText('Contract objective: passed')).toBeVisible();
 
@@ -34,7 +36,7 @@ test.describe('use case 1: launch', () => {
     await page.getByRole('button', { name: 'Next mission' }).click();
     await expect(page.getByRole('radio', { name: /^Mission 2:/ })).toBeChecked();
     await expect(page.getByRole('radio', { name: /^Mission 1:/ })).not.toBeChecked();
-    await expect(page.getByText('Completed · 95')).toBeVisible();
+    await expect(page.getByText('Completed · 100')).toBeVisible();
     await next(page);
     await expect(page.getByRole('checkbox', { name: /CubeSat/ })).not.toBeChecked();
   });

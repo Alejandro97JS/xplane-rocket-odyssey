@@ -2,7 +2,7 @@
 
 `ai/standards/use_case_1_launch.md` defines the levels, the tables, the rocket equation and the hints. While implementing it, some points turned out to be contradictory and others were not defined. This document lists what was decided in each case and why.
 
-**None of these decisions has been approved by the owner yet.** They are implemented so that the game can be played and judged. Each one the owner approves should be moved to `ai/standards` as a rule; each one the owner changes needs a change in `packages/game-core` and its tests.
+**None of these decisions has been approved by the owner yet**, except the rules of the score in section 5, which the owner set and which are in `ai/standards/use_case_1_score.md`. They are implemented so that the game can be played and judged. Each one the owner approves should be moved to `ai/standards` as a rule; each one the owner changes needs a change in `packages/game-core` and its tests.
 
 ## 1. The rocket equation is applied to each stage
 
@@ -70,7 +70,7 @@ The tests in `packages/game-core/test/physics.test.ts` record both facts: the on
 | Short of delta-v | If the rocket cannot reach its first orbit it falls back and burns up. If it reaches a low orbit but cannot finish the transfer, it is left stranded there. | The use case says "re-enters or fails to reach orbit". Both are the same failure with the same hint. |
 | Several failed rules at once | The first one in flight order ends the mission: budget, mass, delta-v, radiation, objective. The debrief lists all five rules with their result. | The animation can only show one ending. Showing every rule saves the player from fixing one problem per launch. |
 | Crew in a failed flight | The texts say that the crew is safe: escape system, capsule landing or return on its own engines. | A failed design should teach, not show a tragedy. |
-| Score | 60 points for fulfilling the contract, up to 25 for unspent budget (all of them at 30% unspent) and up to 15 for delta-v in reserve (all of them at 10% above the required). Three stars from 80 points, two from 65. | The brief asks for a mission score that rewards resource efficiency. A cheaper rocket saves budget and leaves less reserve, so the two bonuses pull against each other. The use case defines no score. |
+| Score | Measured against the optimal design of the level. See section 5. | The brief asks for a mission score that rewards resource efficiency. The use case defines no score. |
 
 ## 3. Differences from the mockups
 
@@ -93,4 +93,42 @@ These were implemented as written. They do not stop the game from working, but t
 4. **Level 1 has exactly one winning design**, although the use case says each level has several valid paths. With that budget and those tables, nothing else fits.
 5. **`our_intention.md` asks for a level selection screen with a single level; the use case asks for five.** The five were built, since the use case is more recent and more specific.
 
-Winning designs per level with the current rules, counting designs of up to four payloads: 1 in level 1, 2 in level 2, 18 in level 3, 269 in level 4 and 73 in level 5. The test "level N can be won, and with three stars" in `packages/game-core/test/rules.test.ts` guards that every level stays winnable.
+Winning designs per level with the current rules, counting every set of payloads: 1 in level 1, 2 in level 2, 18 in level 3, 269 in level 4 and 73 in level 5. The test "level N can be won, and only its optimal design scores 100" in `packages/game-core/test/rules.test.ts` guards that every level stays winnable.
+
+## 5. Score
+
+The owner set the rules of the score on 2026-11-14, and they are in `ai/standards/use_case_1_score.md`: the optimal design of each mission scores 100, every other winning design scores less, and the total is rounded to the nearest integer but a design that is not optimal shows 99 at most. This section describes how they are implemented. **What makes a design optimal, and how the points are split, are not approved yet.**
+
+**Before.** The first score gave 60 points for the contract, up to 25 for unspent budget (all of them at 30% unspent) and up to 15 for delta-v in reserve (all of them at 10% above the required). It broke the owner's rule in every level: the only winning design of level 1 scored 95, levels 2 and 3 had two designs tied at the top, level 4 had 58 designs with 100, and the best design of level 5 scored 98.
+
+**Optimal design.** Of all the designs that fulfil the contract, the cheapest. Between designs of the same cost, the one with the most delta-v left over, as a share of the delta-v the orbit needs. `findOptimalDesign` in `packages/game-core/src/score.ts` finds it by trying every set of payloads with every orbit and rocket, skipping sets that leave no money for the cheapest rocket, and keeps the result after the first call. Level 5, the slowest, takes about 75 ms on the development machine.
+
+**Points.**
+
+| Part | Points | How they are earned |
+| --- | --- | --- |
+| Contract fulfilled | 60 | Every successful mission. |
+| Budget saved | Up to 25 | Money left unspent, as a share of the money the optimal design leaves unspent. |
+| Propellant reserve | Up to 15 | Delta-v reserve, as a share of the reserve of the optimal design. A larger reserve than the optimal design's earns every point. |
+
+The optimal design earns every point. Any other design either costs more, so it loses budget points, or costs the same and keeps less reserve, so it loses reserve points. The total is the exact sum of the parts rounded to the nearest integer, and 99 at most for a design that is not optimal. The parts are shown with one decimal, and a part short of its maximum never shows the maximum. The stars did not change: three from 80 points, two from 65.
+
+**Result**, counting every set of payloads:
+
+| Level | Optimal design | Cost | Reserve | Next best |
+| --- | --- | --- | --- | --- |
+| 1 | CubeSat on Electron, low orbit | $26.5M | 15.8% | None: it is the only winning design. |
+| 2 | Optical pack on Soyuz, low orbit | $77M | 30.0% | 97: the same in sun-synchronous orbit. |
+| 3 | Telecom satellite on Falcon 9, high elliptical orbit | $145M | 24.0% | 97: the same in geostationary orbit. |
+| 4 | Test capsule on Soyuz, low orbit | $115M | 24.0% | 97: several designs, such as the same on Falcon 9. |
+| 5 | Core, laboratory and test capsule on Falcon 9, low orbit | $375M | 13.3% | 97: the same plus the CubeSat. |
+
+No design adds up to 99.5 or more with the current tables, so the cap at 99 never shows in play. A unit test of `roundTotal` checks it.
+
+**For the owner to decide.** The optimal design follows only from cost and reserve, and in some levels that goes against the contract text:
+
+1. Level 3 asks for "zero signal interruptions". Geostationary orbit gives one satellite continuous coverage; in a high elliptical orbit one satellite serves the region for some hours of each orbit. On Falcon 9 both cost the same, and the high elliptical orbit wins because it needs less delta-v.
+2. In level 2 the sun-synchronous orbit is the one the orbit table calls "ideal for global observation", but low orbit wins for the same reason.
+3. Levels 4 and 5 are won best with the one-seat test capsule, although level 4 asks to keep astronauts "operating for several days" and level 5 asks for a place where a crew can live.
+
+Points for a preferred orbit or capsule in each level would make the optimal design match the contract. That was not done, because it changes what the levels ask for.

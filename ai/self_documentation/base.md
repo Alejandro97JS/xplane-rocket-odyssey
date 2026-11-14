@@ -10,7 +10,8 @@ Use case 1, the launch, is implemented and can be played from the title screen t
 
 Waiting for the owner:
 
-- The launch rules in the use case had contradictions and gaps. What was decided for each is in [use_case_1_launch_rules.md](use_case_1_launch_rules.md). None of it is approved yet, so none of it is in `ai/standards`.
+- The launch rules in the use case had contradictions and gaps. What was decided for each is in [use_case_1_launch_rules.md](use_case_1_launch_rules.md). None of it is approved yet, so none of it is in `ai/standards`. The exception is the rules of the score, which the owner set and which are in `ai/standards/use_case_1_score.md`.
+- What makes a design optimal is not approved. It is now the cheapest winning design, then the one with the most delta-v in reserve, and in levels 2 to 5 that goes against the contract text: level 3, for example, is won best in high elliptical orbit instead of geostationary. See section 5 of [use_case_1_launch_rules.md](use_case_1_launch_rules.md).
 - The game is deployed on Railway at <https://rocket-odysseyserver-production.up.railway.app>, but nobody has played the deployed version in a browser yet.
 - Railway has deprecated `railway.json`, which the standard names. Whether to move to `.railway/railway.ts` is the owner's decision. See [use_case_1_implementation.md](use_case_1_implementation.md).
 
@@ -22,7 +23,7 @@ We also want use case 2: `ai/standards/use_case_2_orbit.md`. It is not implement
 | --- | --- |
 | [tech_stack.md](tech_stack.md) | Decision record for the tech stack: reasons for each choice, version check, development machine check, alternatives considered, notes from the implementation and open points. The stack itself is in `ai/standards/tech_stack.md`. |
 | [use_case_1_implementation.md](use_case_1_implementation.md) | What was built for use case 1: screens, where the code is, how the architecture rules are met, how the launch is played back, test results and what is not verified. |
-| [use_case_1_launch_rules.md](use_case_1_launch_rules.md) | Decisions taken where the use case was contradictory or silent, differences from the mockups, and inconsistencies for the owner to resolve. Not approved yet. |
+| [use_case_1_launch_rules.md](use_case_1_launch_rules.md) | Decisions taken where the use case was contradictory or silent, differences from the mockups, inconsistencies for the owner to resolve, and how the score is computed. Not approved yet, except the score rules that are in `ai/standards/use_case_1_score.md`. |
 | [accessibility.md](accessibility.md) | What was done towards WCAG 2.1 AA, what the automated checks cover and what a person still has to check. |
 
 ## Log
@@ -43,3 +44,4 @@ We also want use case 2: `ai/standards/use_case_2_orbit.md`. It is not implement
 | 2026-11-14 | The owner pushed that change and the same `npm` error appeared about two minutes later. The runtime image now also holds the root `package.json`, so `npm start` works in `/app`; this was tested outside Docker. |
 | 2026-11-14 | Read the Railway project with the CLI. Railway had imported the repository as a monorepo and created two services, one per workspace, with start commands, build commands and watch paths of its own, and without reading `railway.json`. With the owner's confirmation, deleted the web service and set the settings of `railway.json` on the server service directly, because Railway has deprecated `railway.json` and does not apply it. Details in [use_case_1_implementation.md](use_case_1_implementation.md). |
 | 2026-11-14 | Deployed commit `ad6dc78` and generated the public domain. The health check passed and the public address serves the game. Upgraded the Railway CLI on the owner's machine from 4.30.5 to 5.74.0, and linked the repository folder to the Railway project of the game, `distinguished-emotion`. |
+| 2026-11-14 | The owner asked that, in each mission, only the optimal design of all those that fulfil the contract gets the maximum score, and then that the total be rounded to the nearest integer, with 99 for a design that is not optimal and adds up to 99.5 or more. The old score broke the first rule in every level. The score is now measured against the optimal design of the level, found by trying every design: the cheapest, then the one with the most delta-v in reserve. The debrief says when a design is the best possible and then hides "Improve the score". Wrote the owner's rules in `ai/standards/use_case_1_score.md` and made it mandatory reading in `ai/standards/standards.md`. Unit tests, end-to-end tests, type checks, ESLint and Prettier pass. The definition of optimal is not approved. |

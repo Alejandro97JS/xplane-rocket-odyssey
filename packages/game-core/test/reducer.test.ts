@@ -143,7 +143,7 @@ describe('reduce', () => {
     expect(selectRecord(state, 'first_space_data')).toEqual({
       attempts: 1,
       completed: true,
-      bestScore: 95,
+      bestScore: 100,
     });
     expect(selectCompletedCount(state)).toBe(1);
   });
@@ -177,7 +177,7 @@ describe('reduce', () => {
     expect(selectRecord(state, 'connecting_the_continent')).toEqual({
       attempts: 3,
       completed: true,
-      bestScore: 95,
+      bestScore: 97,
     });
     expect(state.launch?.sequence).toBe(3);
   });

@@ -30,7 +30,7 @@ packages/game-core/src
   rules.ts               evaluateMission: the five rules applied to a design
   flight.ts              buildFlight: events, phases and telemetry of the flight
   report.ts              buildReport: the written explanation
-  score.ts               computeScore
+  score.ts               computeScore, findOptimalDesign: the score against the optimal design
   simulate.ts            simulate = evaluate + flight + report + score
   state.ts               GameState (plain JSON, Zod schema) and selectors
   reducer.ts             Actions and reduce(state, action)
@@ -75,8 +75,8 @@ How the altitude and speed curves are produced: during the climb they follow the
 
 | Command | What runs | Result on 2026-11-14 |
 | --- | --- | --- |
-| `npm test` | 208 unit tests: tables against the use case, physics, one case per failure and per valid path, every flight ending, reducer, serialization, playback mapping, rocket drawings, server. | All pass. |
-| `npm run test:e2e` | 19 Playwright tests in Chrome against the production build: gameplay, keyboard only, reduced motion, axe on every screen, reflow at 320 pixels. | All pass. |
+| `npm test` | 219 unit tests: tables against the use case, physics, one case per failure and per valid path, every flight ending, the score and the optimal design of each level, reducer, serialization, playback mapping, rocket drawings, server. | All pass on 2026-11-14, after the score change. |
+| `npm run test:e2e` | 19 Playwright tests in Chrome against the production build: gameplay, keyboard only, reduced motion, axe on every screen, reflow at 320 pixels. | All pass on 2026-11-14, after the score change. |
 | `npm run typecheck` | TypeScript strict in the three packages and the end-to-end tests. | No errors. |
 | `npm run lint` | ESLint with `typescript-eslint`, `jsx-a11y` and the rules of hooks. | No errors. |
 

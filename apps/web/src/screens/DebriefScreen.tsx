@@ -208,9 +208,11 @@ export function DebriefScreen() {
             <div className="flex flex-wrap gap-3">
               {success ? (
                 <>
-                  <ActionButton variant="secondary" href={getStep('summary').path}>
-                    Improve the score
-                  </ActionButton>
+                  {!score?.optimal && (
+                    <ActionButton variant="secondary" href={getStep('summary').path}>
+                      Improve the score
+                    </ActionButton>
+                  )}
                   {nextLevel ? (
                     <ActionButton
                       variant="primary"
@@ -266,6 +268,7 @@ function ScoreSummary({ score, best }: { score: Score; best: number | null }) {
         Score: <strong className="figure text-3xl text-gold-bright">{score.total}</strong>
         <span className="text-ink-soft"> / 100</span>
       </p>
+      {score.optimal && <p className="font-bold text-go">Best possible design for this contract</p>}
       {best !== null && best > score.total && (
         <p className="text-ink-soft">Your best on this mission: {best}</p>
       )}

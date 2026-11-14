@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   computeScore,
   evaluateMission,
+  findOptimalDesign,
   HINTS,
+  roundTotal,
   LEVELS,
   ORBITS,
   PAYLOADS,
@@ -437,39 +439,64 @@ describe('evaluateMission', () => {
   });
 });
 
-describe('levels', () => {
-  /** Every design with up to four payloads: 793 payload sets, 5 orbits, 8 rockets. */
-  function* everyDesign(): Generator<CompleteDesign> {
-    const ids = PAYLOADS.map((p) => p.id);
-    const sets: PayloadId[][] = [];
-    const build = (start: number, current: PayloadId[]) => {
-      if (current.length > 0) sets.push(current);
-      if (current.length === 4) return;
-      for (let i = start; i < ids.length; i++) build(i + 1, [...current, ids[i]!]);
-    };
-    build(0, []);
-    for (const payloadIds of sets) {
-      for (const orbit of ORBITS) {
-        for (const rocket of ROCKETS) {
-          yield { payloadIds, orbitId: orbit.id, rocketId: rocket.id };
-        }
+/** Every design: 4,095 payload sets, 5 orbits, 8 rockets. */
+function* everyDesign(): Generator<CompleteDesign> {
+  const ids = PAYLOADS.map((p) => p.id);
+  const sets: PayloadId[][] = [];
+  const build = (start: number, current: PayloadId[]) => {
+    if (current.length > 0) sets.push(current);
+    for (let i = start; i < ids.length; i++) build(i + 1, [...current, ids[i]!]);
+  };
+  build(0, []);
+  for (const payloadIds of sets) {
+    for (const orbit of ORBITS) {
+      for (const rocket of ROCKETS) {
+        yield { payloadIds, orbitId: orbit.id, rocketId: rocket.id };
       }
     }
   }
+}
 
-  it.each(LEVELS)('level $number can be won, and with three stars', (level) => {
+describe('levels', () => {
+  // The rule of ai/standards/use_case_1_score.md.
+  it.each(LEVELS)('level $number can be won, and only its optimal design scores 100', (level) => {
     let wins = 0;
-    let bestStars = 0;
+    const perfect: CompleteDesign[] = [];
+    // The optimal design found here by brute force, without findOptimalDesign.
+    let cheapest: { design: CompleteDesign; totalUsd: number; reserve: number } | null = null;
     for (const d of everyDesign()) {
       const evaluation = evaluateMission(level.id, d);
       const score = computeScore(evaluation);
-      if (score) {
-        wins++;
-        bestStars = Math.max(bestStars, score.stars);
+      if (!score) continue;
+      wins++;
+      expect(score.optimal).toBe(score.total === 100);
+      if (score.total === 100) perfect.push(d);
+      const candidate = {
+        design: d,
+        totalUsd: evaluation.budget.totalUsd,
+        reserve: evaluation.deltaV.marginMs / evaluation.deltaV.requiredMs,
+      };
+      if (
+        cheapest === null ||
+        candidate.totalUsd < cheapest.totalUsd ||
+        (candidate.totalUsd === cheapest.totalUsd && candidate.reserve > cheapest.reserve)
+      ) {
+        cheapest = candidate;
       }
     }
     expect(wins).toBeGreaterThan(0);
-    expect(bestStars).toBe(3);
+    expect(perfect).toEqual([cheapest?.design]);
+    expect(findOptimalDesign(level.id)).toEqual(cheapest);
+  });
+
+  it.each<[LevelId, PayloadId[], OrbitId, RocketId]>([
+    ['first_space_data', ['cubesat'], 'leo', 'electron'],
+    ['environmental_surveillance', ['earth_observation'], 'leo', 'soyuz'],
+    ['connecting_the_continent', ['telecom'], 'heo', 'falcon9'],
+    ['human_horizon', ['capsule_suborbital'], 'leo', 'soyuz'],
+    ['orbital_outpost', ['capsule_suborbital', 'station_core', 'station_lab'], 'leo', 'falcon9'],
+  ])('the optimal design of %s is %j to %s on %s', (level, payloads, orbit, rocket) => {
+    expect(findOptimalDesign(level)?.design).toEqual(design(payloads, orbit, rocket));
   });
 
   it('level 1 has exactly one winning design', () => {
@@ -498,16 +525,57 @@ describe('computeScore', () => {
     expect(computeScore(evaluation)).toBeNull();
   });
 
-  it('adds up to the total and stays within 100', () => {
-    const evaluation = evaluateMission('first_space_data', design(['cubesat'], 'leo', 'electron'));
-    const score = computeScore(evaluation)!;
-    expect(score.parts.reduce((sum, part) => sum + part.points, 0)).toBe(score.total);
+  it.each<[LevelId, PayloadId[], OrbitId, RocketId]>([
+    ['first_space_data', ['cubesat'], 'leo', 'electron'],
+    ['human_horizon', ['capsule_classic'], 'leo', 'falcon9'],
+    ['orbital_outpost', ['capsule_classic', 'station_core', 'station_lab'], 'leo', 'falcon9'],
+  ])('adds up to the total and stays within 100 (%s)', (level, payloads, orbit, rocket) => {
+    const score = computeScore(evaluateMission(level, design(payloads, orbit, rocket)))!;
+    // The parts have one decimal and the total is their sum, rounded.
+    const sum = score.parts.reduce((total, part) => total + part.points, 0);
+    expect(Math.abs(sum - score.total)).toBeLessThanOrEqual(0.65);
+    expect(Number.isInteger(score.total)).toBe(true);
     expect(score.total).toBeLessThanOrEqual(100);
     expect(score.total).toBeGreaterThanOrEqual(60);
     for (const part of score.parts) {
       expect(part.points).toBeGreaterThanOrEqual(0);
       expect(part.points).toBeLessThanOrEqual(part.maxPoints);
     }
+  });
+
+  it('gives every point to the optimal design', () => {
+    const score = computeScore(
+      evaluateMission('first_space_data', design(['cubesat'], 'leo', 'electron')),
+    )!;
+    expect(score).toMatchObject({ total: 100, stars: 3, optimal: true });
+  });
+
+  it('takes points from a design that costs the same but keeps less delta-v', () => {
+    // Same rocket and price as the optimal design, but GEO needs more delta-v than HEO.
+    const score = computeScore(
+      evaluateMission('connecting_the_continent', design(['telecom'], 'geo', 'falcon9')),
+    )!;
+    const points = Object.fromEntries(score.parts.map((p) => [p.id, p.points]));
+    expect(points).toEqual({ objective: 60, budget: 25, margin: 11.8 });
+    expect(score).toMatchObject({ total: 97, optimal: false });
+  });
+
+  it('takes points from a design that keeps more delta-v but costs more', () => {
+    const score = computeScore(
+      evaluateMission('human_horizon', design(['capsule_suborbital'], 'leo', 'falcon9')),
+    )!;
+    const points = Object.fromEntries(score.parts.map((p) => [p.id, p.points]));
+    expect(points).toEqual({ objective: 60, budget: 22.3, margin: 15 });
+    expect(score).toMatchObject({ total: 97, optimal: false });
+  });
+
+  it('rounds the total to the nearest integer, but only the optimal design shows 100', () => {
+    expect(roundTotal(96.49, false)).toBe(96);
+    expect(roundTotal(96.5, false)).toBe(97);
+    expect(roundTotal(99.4, false)).toBe(99);
+    expect(roundTotal(99.5, false)).toBe(99);
+    expect(roundTotal(99.99, false)).toBe(99);
+    expect(roundTotal(100, true)).toBe(100);
   });
 
   it('rewards a cheaper rocket and penalises a thin delta-v reserve', () => {

@@ -36,8 +36,9 @@ export function formatInteger(value: number): string {
   return integer.format(value);
 }
 
-export function formatPercent(fraction: number): string {
-  return `${integer.format(fraction * 100)}%`;
+/** 0.1332 -> "13%", or "13.3%" with one decimal. */
+export function formatPercent(fraction: number, decimals: 0 | 1 = 0): string {
+  return `${(decimals === 1 ? oneDecimal : integer).format(fraction * 100)}%`;
 }
 
 /** 5400 -> "1 h 30 min", 95 -> "1 min 35 s". */
