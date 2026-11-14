@@ -18,6 +18,8 @@ import {
   ReplayIcon,
   RocketIcon,
   SkipIcon,
+  SoundOffIcon,
+  SoundOnIcon,
 } from '../components/icons.tsx';
 import { StepPanel } from '../components/StepPanel.tsx';
 import { EventLog, TONE_CLASS, TONE_ICON } from '../launch/EventLog.tsx';
@@ -33,6 +35,7 @@ import {
 import { StepTimeline } from '../launch/StepTimeline.tsx';
 import { TelemetryPanel } from '../launch/TelemetryPanel.tsx';
 import { TrajectoryMap } from '../launch/TrajectoryMap.tsx';
+import { useLaunchAudio } from '../launch/useLaunchAudio.ts';
 import { useLaunchPlayback } from '../launch/useLaunchPlayback.ts';
 import { cx } from '../lib/cx.ts';
 import { usePrefersReducedMotion } from '../lib/usePrefersReducedMotion.ts';
@@ -89,6 +92,7 @@ interface AnimatedLaunchProps {
 
 function AnimatedLaunch({ result, playback, onUnavailable }: AnimatedLaunchProps) {
   const { clock, seconds, status } = useLaunchPlayback(playback, true);
+  const { muted, toggleMuted } = useLaunchAudio(playback, clock);
   const { flight } = result;
   const t = missionTimeAt(playback, seconds);
   const telemetry = telemetryAt(flight, t);
@@ -151,6 +155,10 @@ function AnimatedLaunch({ result, playback, onUnavailable }: AnimatedLaunchProps
             >
               <ReplayIcon />
               Restart
+            </ActionButton>
+            <ActionButton size="small" onPress={toggleMuted}>
+              {muted ? <SoundOffIcon /> : <SoundOnIcon />}
+              {muted ? 'Turn sound on' : 'Mute sound'}
             </ActionButton>
             {!finished && (
               <ActionButton size="small" href="/debrief" className="ml-auto">

@@ -71,6 +71,7 @@ e2e/                     Playwright tests: gameplay, keyboard, accessibility
 - `LaunchScene` draws each frame as a function of the playback time. It keeps no state of its own apart from the smoke, so pausing, restarting and skipping are safe.
 - The rockets are drawn from data in `art/rocketArt.ts`. The same geometry is drawn as SVG on the rocket cards and with PixiJS in the scene.
 - The telemetry and the map are refreshed about eight times per second; the canvas on every frame.
+- `LaunchAudio` plays the sound, synthesised with the Web Audio API, so there are no audio files. Like the canvas, it depends only on the playback time. The countdown beeps once per mission second, at a higher pitch for the last three, and stops at a hold. From ignition the engines roar while they fire; the roar gets quieter and duller as the air thins and is silent above 100 km, the edge of space, because sound does not travel through a vacuum. A breakup inside the atmosphere is a dull boom. The "Mute sound" button turns it off, and the choice is kept in `localStorage`. The hook is `useLaunchAudio`.
 
 How the altitude and speed curves are produced: during the climb they follow the delta-v delivered so far, with the share lost to gravity and air removed, so the speed equals the orbital speed exactly at insertion. During a transfer they follow the orbit equation. They are meant to look credible, as the standards ask, not to be a trajectory integration.
 
@@ -82,6 +83,8 @@ How the altitude and speed curves are produced: during the climb they follow the
 | `npm run test:e2e` | 25 Playwright tests in Chrome against the production build: gameplay, free exploration, keyboard only, reduced motion, axe on every screen, reflow at 320 pixels. | All pass on 2026-11-14, after free exploration was added. |
 | `npm run typecheck` | TypeScript strict in the three packages and the end-to-end tests. | No errors. |
 | `npm run lint` | ESLint with `typescript-eslint`, `jsx-a11y` and the rules of hooks. | No errors. |
+
+The tests that try every design evaluate more than 100,000 designs each and take about 7 seconds on the development machine, more than the default limit of 5 seconds of Vitest. They have a limit of 60 seconds of their own.
 
 ## Not verified, and what is left
 
