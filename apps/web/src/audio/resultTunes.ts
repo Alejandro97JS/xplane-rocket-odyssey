@@ -5,11 +5,11 @@ import type { SimulationResult } from '@rocket-odyssey/game-core';
  * plain data, written for this game; `ResultMusic` synthesises them with the
  * Web Audio API, so there are no audio files and no recordings of anyone.
  *
- * - Success: a slow sunrise fanfare in D major, in the spirit of the music of
- *   classic space films. A deep organ note grows out of silence, the brass
+ * - Success: a short sunrise fanfare in D major, in the spirit of the music
+ *   of classic space films. A deep organ note grows out of silence, the brass
  *   calls upwards in a fifth and an octave and opens into a major chord over
- *   a timpani roll, then climbs to a full chord with a crash. It is our own
- *   tune: it does not quote any piece.
+ *   a timpani roll, which ends on a stroke. It is our own tune: it does not
+ *   quote any piece.
  * - Failure: the "you lost" jingle of video games: four falling semitones in
  *   a square wave, "wah, wah, wah, waaah", the last one wobbling and sagging.
  */
@@ -17,15 +17,15 @@ import type { SimulationResult } from '@rocket-odyssey/game-core';
 export type Outcome = SimulationResult['outcome'];
 
 /** An instrument of the result music. */
-export type Voice = 'organ' | 'brass' | 'timpani' | 'cymbal' | 'chip' | 'chipBass';
+export type Voice = 'organ' | 'brass' | 'timpani' | 'chip' | 'chipBass';
 
 export interface Note {
   voice: Voice;
   /** Start, in seconds from the start of the tune. */
   at: number;
-  /** How long the note is held, in seconds. Drums and cymbals ring for this long. */
+  /** How long the note is held, in seconds. A drum rings for this long. */
   length: number;
-  /** MIDI note number: 60 is middle C, 69 is A 440 Hz. The cymbal has no pitch. */
+  /** MIDI note number: 60 is middle C, 69 is A 440 Hz. */
   pitch: number;
   /** Loudness, from 0 to 1. */
   level: number;
@@ -50,13 +50,9 @@ const D1 = 26;
 const D2 = 38;
 const A2 = 45;
 const D3 = 50;
-const FS3 = 54;
 const A3 = 57;
 const D4 = 62;
-const E4 = 64;
 const FS4 = 66;
-const A4 = 69;
-const D5 = 74;
 
 const G2 = 43;
 const AB2 = 44;
@@ -90,32 +86,24 @@ function tune(notes: Note[], hall: number, tail: number): Tune {
   return { notes, hall, duration: end + tail };
 }
 
-/** When the final chord of the success fanfare starts, in seconds. */
-const CLIMAX_S = 6.8;
+/** When the major chord of the success fanfare opens, and when it ends, in seconds. */
+const CHORD_S = 4;
+const END_S = 6;
 
 const SUCCESS = tune(
   [
     // The deep organ note that grows out of silence and holds everything up.
-    { voice: 'organ', at: 0, length: CLIMAX_S + 2.6, pitch: D1, level: 0.22, attack: 2.5 },
-    { voice: 'organ', at: 0, length: CLIMAX_S + 2.6, pitch: D2, level: 0.3, attack: 2.5 },
+    { voice: 'organ', at: 0, length: END_S, pitch: D1, level: 0.22, attack: 2.5 },
+    { voice: 'organ', at: 0, length: END_S, pitch: D2, level: 0.3, attack: 2.5 },
     // The call of the brass: up a fifth, up a fourth to the octave.
     { voice: 'brass', at: 1, length: 0.95, pitch: D3, level: 0.08, attack: 0.3 },
     { voice: 'brass', at: 2, length: 0.95, pitch: A3, level: 0.09, attack: 0.3 },
     { voice: 'brass', at: 3, length: 1, pitch: D4, level: 0.1, attack: 0.3 },
-    // It opens into a major chord over a growing roll.
-    ...chord('brass', 4, 1.5, [D3, A3, D4, FS4], 0.08),
-    ...roll(4, 1.45, A2, 0.06, 0.4),
+    // It opens into a major chord over a growing roll, which ends on a stroke.
+    // The chord is held a moment after the stroke, so the tune ends on it.
+    ...chord('brass', CHORD_S, END_S - CHORD_S, [D3, A3, D4, FS4], 0.08),
+    ...roll(CHORD_S, 1.45, A2, 0.06, 0.4),
     { voice: 'timpani', at: 5.5, length: 1.1, pitch: D3, level: 0.6 },
-    // A shorter climb, pushed on by a second roll.
-    { voice: 'brass', at: 5.7, length: 0.36, pitch: E4, level: 0.17, attack: 0.06 },
-    { voice: 'brass', at: 6.06, length: 0.36, pitch: FS4, level: 0.18, attack: 0.06 },
-    { voice: 'brass', at: 6.42, length: 0.36, pitch: A4, level: 0.2, attack: 0.06 },
-    ...roll(5.75, 1, A2, 0.08, 0.5),
-    // The full chord, with the organ, a timpani stroke and a crash.
-    ...chord('brass', CLIMAX_S, 2.6, [D3, A3, D4, FS4, A4, D5], 0.2),
-    ...chord('organ', CLIMAX_S, 2.6, [A2, D3, FS3], 0.2).map((note) => ({ ...note, attack: 0.3 })),
-    { voice: 'timpani', at: CLIMAX_S, length: 1.6, pitch: D3, level: 1 },
-    { voice: 'cymbal', at: CLIMAX_S, length: 3.2, pitch: 0, level: 0.3 },
   ],
   0.4,
   2.5,

@@ -115,9 +115,6 @@ export function scheduleTune(
       case 'timpani':
         timpani(context, bus, noise, note, t0);
         break;
-      case 'cymbal':
-        cymbal(context, bus, noise, note, t0);
-        break;
       case 'chip':
       case 'chipBass':
         chip(context, bus, note, t0, t1);
@@ -254,29 +251,6 @@ function timpani(
   stick.connect(filter).connect(gain).connect(out);
   stick.start(t0);
   stick.stop(t0 + 0.14);
-}
-
-/** Cymbal: high noise that dies away slowly. */
-function cymbal(
-  context: BaseAudioContext,
-  out: AudioNode,
-  noise: AudioBuffer,
-  note: Note,
-  t0: number,
-) {
-  const source = context.createBufferSource();
-  source.buffer = noise;
-  source.loop = true;
-  const filter = context.createBiquadFilter();
-  filter.type = 'highpass';
-  filter.frequency.value = 5000;
-  const gain = context.createGain();
-  gain.gain.setValueAtTime(0.0001, t0);
-  gain.gain.exponentialRampToValueAtTime(note.level, t0 + 0.01);
-  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + note.length);
-  source.connect(filter).connect(gain).connect(out);
-  source.start(t0);
-  source.stop(t0 + note.length + 0.02);
 }
 
 /**

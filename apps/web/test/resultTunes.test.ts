@@ -12,26 +12,24 @@ describe('result music', () => {
     for (const note of tune.notes) {
       expect(note.at).toBeGreaterThanOrEqual(0);
       expect(note.length).toBeGreaterThan(0);
-      // Above zero, because drums and cymbals die away exponentially from it.
+      // Above zero, because drums die away exponentially from it.
       expect(note.level).toBeGreaterThan(0);
       expect(note.level).toBeLessThanOrEqual(1);
-      if (note.voice !== 'cymbal') {
-        // From the lowest to the highest key of a piano.
-        expect(note.pitch).toBeGreaterThanOrEqual(21);
-        expect(note.pitch).toBeLessThanOrEqual(108);
-      }
+      // From the lowest to the highest key of a piano.
+      expect(note.pitch).toBeGreaterThanOrEqual(21);
+      expect(note.pitch).toBeLessThanOrEqual(108);
       expect(note.at + note.length).toBeLessThan(tune.duration);
     }
   });
 
   it('the success fanfare is short and ends on the major chord of its key', () => {
     const { notes, duration } = RESULT_TUNES.success;
-    expect(duration).toBeLessThan(14);
+    // About 6 seconds of music, then the echo; the owner found 9 seconds too long.
+    expect(Math.max(...notes.map((note) => note.at + note.length))).toBeLessThanOrEqual(7);
+    expect(duration).toBeLessThan(10);
     const lastStart = Math.max(...notes.map((note) => note.at));
     // Every pitched note still sounding then, the deep organ note included.
-    const lastChord = notes.filter(
-      (n) => n.voice !== 'cymbal' && n.at <= lastStart && lastStart < n.at + n.length,
-    );
+    const lastChord = notes.filter((n) => n.at <= lastStart && lastStart < n.at + n.length);
     // D major: D, F sharp and A, with D at the bottom.
     expect(new Set(lastChord.map(pitchClass))).toEqual(new Set([2, 6, 9]));
     expect(pitchClass(lastChord.reduce((low, n) => (n.pitch < low.pitch ? n : low)))).toBe(2);

@@ -9,6 +9,7 @@ The launch already has sound, from the countdown until the rocket reaches space.
 1. When a mission succeeds, music plays that recalls the music of the film *2001: A Space Odyssey*.
 2. When a mission fails, music plays that recalls the music video games typically play when the player loses.
 3. The music must be free of copyright.
+4. The success music is short: only the opening of the fanfare, about 6 seconds of music. The owner found the first version, about 9 seconds, too long and asked to keep only its first half.
 
 ## Not approved yet
 
