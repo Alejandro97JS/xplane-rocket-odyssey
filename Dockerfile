@@ -33,6 +33,9 @@ ENV PORT=3000
 WORKDIR /app
 
 COPY --from=deps /app/node_modules node_modules
+# The root manifest makes "npm start" work too, in case the platform starts the
+# service with it instead of the CMD below.
+COPY package.json ./
 COPY apps/server/package.json apps/server/package.json
 COPY --from=build /app/apps/server/dist apps/server/dist
 COPY --from=build /app/apps/web/dist apps/web/dist
