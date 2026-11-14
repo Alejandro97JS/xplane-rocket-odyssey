@@ -1,14 +1,14 @@
-import type { SimulationResult } from '@rocket-odyssey/game-core';
+import type { PayloadId, SimulationResult } from '@rocket-odyssey/game-core';
 import { Application, Container, Graphics } from 'pixi.js';
 import {
   buildCapsuleNose,
-  buildStowedPayload,
   getRocketArt,
   type Engine,
   type RocketArt,
   type Shape,
 } from '../art/rocketArt.ts';
 import { createRandom } from '../lib/random.ts';
+import { drawPayload } from './payloadDeploy.ts';
 import { frameAt, type Playback, type SceneFrame } from './playback.ts';
 
 /**
@@ -73,6 +73,34 @@ interface Debris {
 
 type NoseKind = 'fairing' | 'capsule' | 'internal';
 
+/** One payload riding under the fairing or in the cargo bay. */
+interface CargoItem {
+  id: PayloadId;
+  g: Graphics;
+  /** Size of its slot, in pixels. */
+  w: number;
+  h: number;
+  /** Centre of its slot along the rocket, in pixels from the base of the nose. */
+  y: number;
+  /** Order of release: 0 leaves first. */
+  order: number;
+  /** Light payloads are pushed away faster than heavy ones. */
+  push: number;
+  /** Where it settles across the line of flight, in slot widths. */
+  side: number;
+  /** Slow turn, in radians per second. Only a tiny CubeSat tumbles; the rest keep pointing at the Earth. */
+  spin: number;
+  /** Deployment already drawn, so the drawing is only redone when it changes. */
+  drawnOpen: number;
+}
+
+/** Screen seconds between the release of two payloads. */
+const MAX_RELEASE_GAP_S = 0.7;
+/** Time for all the payloads to leave, whatever their number. */
+const RELEASE_WINDOW_S = 1.8;
+/** How close the camera may come to the payloads. */
+const MAX_CARGO_ZOOM = 8;
+
 export class LaunchScene {
   private app: Application | null = null;
   private host: HTMLElement | null = null;
@@ -109,7 +137,8 @@ export class LaunchScene {
   private readonly lower = new Graphics();
   private readonly upperFront = new Graphics();
   private readonly payload = new Container();
-  private readonly payloadPanels = new Graphics();
+  private readonly adapter = new Graphics();
+  private readonly cargo: CargoItem[] = [];
   private readonly fairingLeft = new Graphics();
   private readonly fairingRight = new Graphics();
   private readonly tower = new Graphics();
@@ -402,14 +431,11 @@ export class LaunchScene {
       const capsule = buildCapsuleNose(art.noseBaseDiameter);
       this.drawShapes(body, capsule.capsule, 0);
       this.drawShapes(this.tower, capsule.tower, -this.payloadBaseY);
+      this.payload.addChild(body);
     } else {
-      const diameter =
-        this.noseKind === 'internal' ? art.noseBaseDiameter * 0.5 : art.noseBaseDiameter;
-      this.drawShapes(body, buildStowedPayload(diameter, this.payloadHeight), 0);
+      this.buildCargo();
     }
-    this.payload.addChild(this.payloadPanels, body);
     this.payload.y = -this.payloadBaseY * this.unit;
-    this.payload.visible = this.noseKind !== 'internal';
 
     if (art.fairing) {
       this.drawShapes(this.fairingLeft, art.fairing.left, 0);
@@ -430,6 +456,57 @@ export class LaunchScene {
       this.fairingRight,
       this.tower,
     );
+  }
+
+  /**
+   * The payloads stacked in the nose or the cargo bay, the heaviest at the
+   * bottom. Each one gets a slot that grows with its mass, and the lightest
+   * leaves first.
+   */
+  private buildCargo(): void {
+    const u = this.unit;
+    const internal = this.noseKind === 'internal';
+    const diameter = (internal ? 0.5 : 1) * this.art.noseBaseDiameter * u;
+    const payloads = [...this.result.evaluation.payloads].sort((a, b) => b.massKg - a.massKg);
+    const sizeOf = (massKg: number) => Math.cbrt(massKg);
+    const largest = sizeOf(payloads[0]?.massKg ?? 1);
+    const total = payloads.reduce((sum, p) => sum + sizeOf(p.massKg), 0);
+
+    // The adapter cone that holds the stack and stays on the stage.
+    const adapterHeight = internal ? 0 : this.payloadHeight * u * 0.12;
+    if (!internal) {
+      const bottom = diameter * 0.42;
+      const top = diameter * 0.28;
+      this.adapter
+        .poly([-bottom, 0, bottom, 0, top, -adapterHeight, -top, -adapterHeight])
+        .fill({ color: 0x7c889e });
+    }
+    this.payload.addChild(this.adapter);
+
+    const available = this.payloadHeight * u - adapterHeight;
+    let base = adapterHeight;
+    payloads.forEach((payload, i) => {
+      const share = sizeOf(payload.massKg) / total;
+      const h = available * share;
+      const w = diameter * 0.62 * Math.max(0.55, sizeOf(payload.massKg) / largest);
+      const g = new Graphics();
+      const order = payloads.length - 1 - i;
+      const item: CargoItem = {
+        id: payload.id,
+        g,
+        w,
+        h,
+        y: -(base + h / 2),
+        order,
+        push: Math.min(1.8, Math.max(0.7, (1500 / payload.massKg) ** 0.2)),
+        side: [0, 1, -1, 2, -2][order % 5]!,
+        spin: (order % 2 === 0 ? 1 : -1) * (payload.massKg < 200 ? 0.35 : 0.04),
+        drawnOpen: -1,
+      };
+      base += h;
+      this.cargo.push(item);
+      this.payload.addChild(g);
+    });
   }
 
   /** Draws rocket shapes. The drawing has y pointing up; the screen has y pointing down. */
@@ -537,17 +614,23 @@ export class LaunchScene {
       focus = lerp(focus, upperCentre, f);
       zoom = lerp(1, Math.min(2.4, Math.max(1, (ROCKET_HEIGHT_PX * 0.6) / (upperHeight * u))), f);
     }
-    // A payload under a fairing leaves ahead of the stage; one carried inside
-    // leaves sideways, out of the cargo bay.
-    const internal = this.noseKind === 'internal';
+    // A capsule flies ahead of the stage. Payloads under a fairing leave ahead
+    // of it one by one; those carried inside leave sideways, out of the cargo
+    // bay. The camera follows them and backs off to keep them all in view.
+    const capsuleNose = this.noseKind === 'capsule';
     const payloadShift = deployed === undefined ? 0 : 26 * deployed + 9 * deployed * deployed;
+    const cargo = capsuleNose ? null : this.poseCargo(deployed);
     let focusSide = 0;
     if (deployed !== undefined) {
       const f = smooth(deployed / 1.5);
-      const along = internal ? 0 : payloadShift / u;
-      focus = lerp(focus, this.payloadBaseY + this.payloadHeight / 2 + along, f);
-      focusSide = internal ? -payloadShift * f : 0;
-      zoom = lerp(zoom, Math.min(3.4, Math.max(zoom, 86 / (this.payloadHeight * u))), f);
+      if (cargo) {
+        focus = lerp(focus, this.payloadBaseY - cargo.centreY / u, f);
+        focusSide = cargo.centreX * f;
+        zoom = lerp(zoom, Math.min(MAX_CARGO_ZOOM, Math.max(1, cargo.fit)), f);
+      } else {
+        focus = lerp(focus, this.payloadBaseY + this.payloadHeight / 2 + payloadShift / u, f);
+        zoom = lerp(zoom, Math.min(3.4, Math.max(zoom, 86 / (this.payloadHeight * u))), f);
+      }
     }
 
     // Tilt: straight up at liftoff, level with the horizon at orbital speed.
@@ -615,48 +698,84 @@ export class LaunchScene {
       this.tower.alpha = 1 - clamp01((fired - 0.5) / 1);
     }
 
-    // The payload flies free and opens its solar panels.
-    this.payload.visible = !internal || deployed !== undefined;
-    this.payload.alpha = internal ? smooth((deployed ?? 0) / 0.6) : 1;
-    this.payload.position.set(
-      internal ? -payloadShift : 0,
-      -this.payloadBaseY * u - (internal ? 0 : payloadShift),
-    );
-    this.payloadPanels.clear();
-    if (deployed !== undefined && this.noseKind !== 'capsule') {
-      const open = smooth((deployed - 0.5) / 1.8);
-      const reach = this.payloadHeight * u * 1.5 * open;
-      const panelY = -this.payloadHeight * u * 0.62;
-      const panelHeight = this.payloadHeight * u * 0.3;
-      const bodyHalf = (internal ? art.noseBaseDiameter * 0.5 : art.noseBaseDiameter) * 0.31 * u;
-      if (reach > 1) {
-        for (const side of [-1, 1]) {
-          const x0 = side * bodyHalf;
-          this.payloadPanels
-            .poly([
-              x0,
-              panelY,
-              x0 + side * reach,
-              panelY,
-              x0 + side * reach,
-              panelY + panelHeight,
-              x0,
-              panelY + panelHeight,
-            ])
-            .fill({ color: 0x1e4fa8 });
-          this.payloadPanels
-            .moveTo(x0 + side * reach * 0.5, panelY)
-            .lineTo(x0 + side * reach * 0.5, panelY + panelHeight)
-            .stroke({ width: 1, color: 0x6fb1ff, alpha: 0.8 });
-        }
-      }
-    }
+    // The capsule flies free.
+    if (capsuleNose) this.payload.position.set(0, -this.payloadBaseY * u - payloadShift);
     // After the release the stage is left behind.
     const stageAlpha = deployed === undefined ? 1 : 1 - 0.55 * smooth(deployed / 2.5);
     this.upperBack.alpha = stageAlpha;
     this.upperFront.alpha = stageAlpha;
 
     this.drawFlames(frame);
+  }
+
+  /**
+   * Places each payload: in its slot until its turn, then pushed away from
+   * the stage while it unfolds. Returns the middle of the group and its size,
+   * in pixels, for the camera.
+   */
+  private poseCargo(deployed: number | undefined): {
+    centreX: number;
+    centreY: number;
+    /** Zoom that keeps the whole group in view. */
+    fit: number;
+  } {
+    const internal = this.noseKind === 'internal';
+    const count = this.cargo.length;
+    const gap = count > 1 ? Math.min(MAX_RELEASE_GAP_S, RELEASE_WINDOW_S / (count - 1)) : 0;
+    const stack = this.payloadHeight * this.unit;
+    // Room between neighbours, enough for their unfolded wings.
+    const largestSlot = Math.max(0, ...this.cargo.map((item) => Math.max(item.w, item.h)));
+    const spread = Math.max(stack * 0.42, largestSlot * 1.3);
+    let sumX = 0;
+    let sumY = 0;
+    const placed: { x: number; y: number; reach: number }[] = [];
+    for (const item of this.cargo) {
+      const r = deployed === undefined ? -1 : deployed - item.order * gap;
+      let x = 0;
+      let y = item.y;
+      let open = 0;
+      if (r > 0) {
+        // Distances scale with the nose, so the group fits the view on any rocket.
+        // Out of a cargo bay, a payload first has to clear the hull.
+        const clear = internal ? this.art.noseBaseDiameter * this.unit * 0.75 : 0;
+        const away = (clear + stack * (0.18 + 0.05 * r) * item.push) * easeOut(r / 1.4);
+        const across = item.side * spread * smooth(r / 2);
+        if (internal) {
+          // Out of the bay they line up along the ship, in order of release.
+          const slot = (item.order - (count - 1) / 2) * largestSlot * 2.6;
+          x = -away;
+          y = lerp(item.y, -stack / 2 - slot, smooth(r / 2));
+        } else {
+          x = across;
+          y = item.y - away;
+        }
+        open = smooth((r - 0.4) / 1.8);
+      }
+      item.g.position.set(x, y);
+      item.g.rotation = r > 0 ? item.spin * r : 0;
+      // Inside the cargo bay a payload is hidden until the doors let it out.
+      item.g.visible = !internal || r > 0;
+      item.g.alpha = internal ? smooth(r / 0.6) : 1;
+      if (item.drawnOpen < 0 || Math.abs(open - item.drawnOpen) > 0.002) {
+        item.g.clear();
+        drawPayload(item.g, item.id, item.w, item.h, open);
+        item.drawnOpen = open;
+      }
+      sumX += x;
+      sumY += y;
+      // Unfolded wings and antennas reach well beyond the slot.
+      placed.push({ x, y, reach: Math.max(item.w, item.h) * (0.6 + 0.9 * open) });
+    }
+    const centreX = count > 0 ? sumX / count : 0;
+    const centreY = count > 0 ? sumY / count : 0;
+    // In orbit the rocket lies level: its length runs across the screen.
+    let across = 1;
+    let along = 1;
+    for (const p of placed) {
+      across = Math.max(across, 2 * (Math.abs(p.x - centreX) + p.reach));
+      along = Math.max(along, 2 * (Math.abs(p.y - centreY) + p.reach));
+    }
+    return { centreX, centreY, fit: Math.min((W * 0.7) / along, (H * 0.7) / across) };
   }
 
   private drawFlames(frame: SceneFrame): void {
