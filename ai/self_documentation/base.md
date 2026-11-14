@@ -11,7 +11,7 @@ Use case 1, the launch, is implemented and can be played from the title screen t
 Waiting for the owner:
 
 - The launch rules in the use case had contradictions and gaps. What was decided for each is in [use_case_1_launch_rules.md](use_case_1_launch_rules.md). None of it is approved yet, so none of it is in `ai/standards`.
-- The game has not been deployed, and the Docker image has not been built.
+- The game has not been deployed, and the Docker image has not been built. The repository is ready for it: see "Not verified, and what is left" in [use_case_1_implementation.md](use_case_1_implementation.md). The owner has to log in with `railway login`, or connect the GitHub repository from the Railway dashboard, and confirm the deployment.
 
 We also want use case 2: `ai/standards/use_case_2_orbit.md`. It is not implemented.
 
@@ -37,3 +37,4 @@ We also want use case 2: `ai/standards/use_case_2_orbit.md`. It is not implement
 | 2026-11-14 | Built the client: title screen and the five planning steps in the style of the mockups. The owner committed this state and added use case 2 to the standards. |
 | 2026-11-14 | Built the launch (PixiJS animation, telemetry, event log, trajectory map, list of steps for reduced motion) and the debrief. |
 | 2026-11-14 | Added the server, the production build, the `Dockerfile`, `railway.json`, ESLint, Prettier and the end-to-end and accessibility tests. Fixed what they found. Wrote this documentation. |
+| 2026-11-14 | The owner asked whether the repository is ready for Railway. Reproduced the three stages of the `Dockerfile` by hand from the committed tree and they work. Docker Desktop was still not running and the Railway session was still expired, so the image was not built and nothing was deployed. Found two things to improve in the server, neither of them blocking. No code was changed. |

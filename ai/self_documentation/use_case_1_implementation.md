@@ -82,8 +82,16 @@ How the altitude and speed curves are produced: during the climb they follow the
 
 ## Not verified, and what is left
 
-- **The Docker image has not been built.** Docker Desktop was not running on the development machine. The runtime stage was reproduced by hand outside Docker: installing only the dependencies of the server (3 packages) and starting it with the two build folders worked. The `Dockerfile` itself is untested.
-- **Nothing has been deployed.** Each deployment needs the confirmation of the owner, and the Railway session had expired.
+- **The Docker image has not been built.** Docker Desktop was not running on the development machine. The three stages were reproduced by hand outside Docker, on Windows, from a copy of the committed tree without the files that `.dockerignore` leaves out:
+  - Build stage: `npm ci` from the manifests alone, then `npm run build`, produced `apps/web/dist` and `apps/server/dist`.
+  - Dependencies stage: `npm ci --omit=dev --workspace @rocket-odyssey/server` installed 3 packages.
+  - Runtime stage: with only `node_modules`, `apps/server/package.json` and the two build folders, the server started on `PORT` and answered `/health`, `/`, the addresses of the screens, the assets and `/api/*` as expected, also with the host name Railway uses for its health check.
+  - What this does not cover is Alpine Linux. The lockfile does contain the musl builds of the native packages the build needs (Rolldown, Tailwind, Lightning CSS).
+- **Nothing has been deployed.** Each deployment needs the confirmation of the owner, and the Railway session had expired. `main` is in step with `origin/main`, so a deployment from GitHub would get the current code. When the public domain is generated, its target port has to be the port the server prints in the deployment log: Railway sets `PORT` itself, and it may not be the 3000 of the `Dockerfile`.
+- **Two things to improve in the server, found on 2026-11-14, neither blocking:**
+  - `/` is answered by the static file handler, without `Cache-Control`. The other addresses of the game get `no-cache`. After a new deployment, a browser could keep an old page that asks for assets that no longer exist.
+  - Responses are not compressed. The largest script is 346 kB, and 105 kB with gzip.
+- **The game cannot be shown inside a frame on another site.** The server sends `X-Frame-Options: SAMEORIGIN`. This is the default of the secure headers and only matters if the game has to be embedded somewhere.
 - **No screen reader has been used on the game.** The automated checks and the keyboard test pass, but a person has to do that pass.
 - **The owner has to judge whether the animation looks credible.**
 - **Use case 2** (`ai/standards/use_case_2_orbit.md`, the piloting phase after a successful design) is not implemented. The debrief of a success is where it would start.
