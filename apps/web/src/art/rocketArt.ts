@@ -671,39 +671,3 @@ export function buildCapsuleNose(diameter: number): {
   ];
   return { capsule, tower, height: towerTop };
 }
-
-/**
- * A generic satellite folded for launch, shown under the fairing once the
- * fairing is gone. Returns shapes whose base is at y = 0.
- */
-export function buildStowedPayload(diameter: number, height: number): Shape[] {
-  const d = diameter * 0.62;
-  const bodyTop = height * 0.72;
-  return [
-    // Adapter cone.
-    poly(
-      [-diameter * 0.42, 0, diameter * 0.42, 0, d * 0.45, height * 0.14, -d * 0.45, height * 0.14],
-      GREY.dark,
-    ),
-    rect(-d / 2, height * 0.14, d / 2, bodyTop, '#d9a53a'),
-    rect(-d / 2, height * 0.14, -d * 0.2, bodyTop, '#f1cc6f', 0.8),
-    rect(d * 0.18, height * 0.14, d / 2, bodyTop, '#a6761d', 0.85),
-    // Folded solar panels on both sides.
-    rect(-d * 0.66, height * 0.2, -d * 0.52, bodyTop * 0.94, '#1e4fa8'),
-    rect(d * 0.52, height * 0.2, d * 0.66, bodyTop * 0.94, '#153a80'),
-    // Antenna dish on top.
-    poly(
-      [
-        -d * 0.3,
-        bodyTop,
-        d * 0.3,
-        bodyTop,
-        d * 0.12,
-        bodyTop + height * 0.1,
-        -d * 0.12,
-        bodyTop + height * 0.1,
-      ],
-      WHITE.base,
-    ),
-  ];
-}

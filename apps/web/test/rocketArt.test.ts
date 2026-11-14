@@ -1,11 +1,6 @@
 import { ROCKETS } from '@rocket-odyssey/game-core';
 import { describe, expect, it } from 'vitest';
-import {
-  buildCapsuleNose,
-  buildStowedPayload,
-  getRocketArt,
-  type Shape,
-} from '../src/art/rocketArt.ts';
+import { buildCapsuleNose, getRocketArt, type Shape } from '../src/art/rocketArt.ts';
 
 function bounds(shapes: Shape[]) {
   let minX = Infinity;
@@ -66,13 +61,9 @@ describe('rocket drawings', () => {
     expect(art.fairing !== null).toBe(rocket.payloadBay === 'fairing');
   });
 
-  it('builds a capsule and a stowed payload that sit on their base', () => {
+  it('builds a capsule that sits on its base', () => {
     const capsule = buildCapsuleNose(3.7);
     expect(bounds([...capsule.capsule, ...capsule.tower]).minY).toBeCloseTo(0, 6);
     expect(bounds(capsule.tower).maxY).toBeCloseTo(capsule.height, 6);
-
-    const payload = buildStowedPayload(5.2, 10);
-    expect(bounds(payload).minY).toBeCloseTo(0, 6);
-    expect(bounds(payload).maxY).toBeLessThanOrEqual(10);
   });
 });
