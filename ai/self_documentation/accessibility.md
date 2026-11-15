@@ -44,11 +44,16 @@ Two findings of that work were fixed on the way: the link in the header had a na
 
 Automated checks find only part of the problems.
 
-- A pass with a screen reader (NVDA or VoiceOver) over the whole level, listening to how the option cards, the event log and the debrief read.
-- Contrast of text over gradients, which axe cannot measure. The gradients used are all darker than the panel fill the colours were chosen against.
-- Zoom to 200% and text spacing overrides.
+- A pass with a screen reader (NVDA or VoiceOver) over the whole level, listening to how the option cards, the event log and the debrief read. On 2026-11-15 the accessibility tree was read instead, and it is right, but nothing was heard.
 - Windows High Contrast itself, with a dark and a light theme. Forced colours were only seen through the emulation of Chrome.
 - Whether the animation is comfortable to watch, for people who do not set reduced motion.
+
+Done by hand on 2026-11-15, in the deployed game with Claude in Chrome (details in [general_review.md](general_review.md)):
+
+- Contrast of text over gradients, which axe cannot measure: every pair passes 4.5:1, except the white figures inside the bars of the delta-v chart (3.6:1 and 3.9:1), which are now dark (5.6:1 and 5.2:1).
+- Text spacing overrides (1.4.12): nothing clipped or overlapping on the five steps, the launch and the debrief.
+- Zoom to 200 % (768 × 320 CSS pixels): no sideways scrolling, and the over-budget dialog scrolls with its focused button in view.
+- Keyboard and visible focus on the title screen and step 1, in the real browser.
 
 ## Two deliberate exceptions to the lint rules
 

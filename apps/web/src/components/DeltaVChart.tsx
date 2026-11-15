@@ -47,7 +47,8 @@ export function DeltaVChart({ deltaV, orbitName }: DeltaVChartProps) {
               style={{ width: share(stage.deltaVMs), backgroundColor: STAGE_COLORS[index] }}
             >
               {stage.deltaVMs / domain > 0.16 && (
-                <span className="readout truncate text-sm font-bold text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.7)]">
+                // Dark on both stage colours: 5.6:1 and 5.2:1. White was 3.6:1 and 3.9:1.
+                <span className="readout truncate text-sm font-bold text-space-950">
                   {formatSpeed(stage.deltaVMs)}
                 </span>
               )}
