@@ -29,7 +29,7 @@ The target is WCAG 2.1 AA. This document records what was done to meet it, what 
 
 Since 2026-11-14 the run also checks that the debrief has its sound button in the header, and that the button mutes the launch too.
 
-The same run plays the level with the keyboard alone, enters free exploration with the keyboard and moves between it and the contracts with the arrow keys, checks the dialog focus trap and checks reflow at 320 pixels on every screen. The decisions about the accessibility of free exploration are in [free_exploration.md](free_exploration.md).
+The same run plays the level with the keyboard alone, enters free exploration with the keyboard from step 1 and moves between it and the contracts with the arrow keys, checks the dialog focus trap and checks reflow at 320 pixels on every screen. The decisions about the accessibility of free exploration are in [free_exploration.md](free_exploration.md).
 
 Two findings of that work were fixed on the way: the link in the header had a name that did not contain its visible text, and the first screen took focus away from the skip link.
 

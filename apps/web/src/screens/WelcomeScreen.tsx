@@ -1,11 +1,10 @@
-import { LEVELS, selectCompletedCount } from '@rocket-odyssey/game-core';
-import { useNavigate } from 'react-router';
-import { useDispatch, useGame } from '../app/store.ts';
+import { LEVELS, selectCompletedCount, selectHasMission } from '@rocket-odyssey/game-core';
+import { useGame } from '../app/store.ts';
 import { getStep } from '../app/steps.ts';
 import { RocketSvg } from '../art/RocketSvg.tsx';
 import { ActionButton } from '../components/ActionButton.tsx';
 import { Frame } from '../components/Frame.tsx';
-import { ChevronRightIcon, InfinityIcon } from '../components/icons.tsx';
+import { ChevronRightIcon } from '../components/icons.tsx';
 import { Logo } from '../components/Logo.tsx';
 import { usePageHeading } from '../lib/usePageHeading.ts';
 
@@ -29,16 +28,16 @@ const LOOP = [
 ];
 
 /**
- * The title screen: the name of the game, what it is about and two ways in.
- * Contracts come first: they are the game. Free exploration is next to them,
- * for players who want to try anything without a budget.
+ * The title screen: the name of the game, what it is about and one way in, to
+ * the first planning step. Free exploration is chosen there, next to the
+ * contracts, not here (rule 4 of `ai/standards/free_exploration.md`).
  */
 export function WelcomeScreen() {
   const headingRef = usePageHeading('Welcome');
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
   const completed = useGame(selectCompletedCount);
-  const contractStarted = useGame((state) => state.levelId !== null);
+  // A contract or free exploration already chosen in step 1. The link leaves
+  // the mode alone, so the player finds step 1 as they left it.
+  const planningStarted = useGame(selectHasMission);
 
   return (
     <main id="main" className="flex flex-1 flex-col justify-center py-4">
@@ -62,41 +61,20 @@ export function WelcomeScreen() {
               find out if your design reaches orbit.
             </p>
 
-            <div className="mt-9 grid max-w-2xl gap-x-5 gap-y-6 sm:grid-cols-2">
-              <div>
-                <ActionButton
-                  variant="primary"
-                  href={getStep('mission').path}
-                  onPress={() => dispatch({ type: 'mode/select', mode: 'contract' })}
-                  aria-describedby="contracts-caption"
-                  className="!min-h-16 w-full !px-6 !text-xl sm:!text-2xl"
-                >
-                  {contractStarted ? 'Continue planning' : 'Start mission'}
-                  <ChevronRightIcon />
-                </ActionButton>
-                <p id="contracts-caption" className="mt-2 text-ink-soft">
-                  {LEVELS.length} contracts, each with a client and a budget · {completed} completed
-                </p>
-              </div>
-              <div>
-                {/* A button, not a link: the mode must change before the step opens. */}
-                <ActionButton
-                  variant="secondary"
-                  onPress={() => {
-                    dispatch({ type: 'mode/select', mode: 'free_exploration' });
-                    void navigate(getStep('payload').path);
-                  }}
-                  aria-describedby="free-caption"
-                  className="!min-h-16 w-full !px-6 !text-xl sm:!text-2xl"
-                >
-                  <InfinityIcon />
-                  Free exploration
-                </ActionButton>
-                <p id="free-caption" className="mt-2 text-ink-soft">
-                  No contract and no budget limit. Fly anything you want and see what physics
-                  allows.
-                </p>
-              </div>
+            <div className="mt-9 max-w-md">
+              <ActionButton
+                variant="primary"
+                href={getStep('mission').path}
+                aria-describedby="contracts-caption"
+                className="!min-h-16 w-full !px-6 !text-xl sm:w-96 sm:!text-2xl"
+              >
+                {planningStarted ? 'Continue planning' : 'Start mission'}
+                <ChevronRightIcon />
+              </ActionButton>
+              <p id="contracts-caption" className="mt-2 text-ink-soft">
+                {LEVELS.length} contracts, each with a client and a budget{' '}
+                <span className="whitespace-nowrap">· {completed} completed</span>
+              </p>
             </div>
           </div>
 

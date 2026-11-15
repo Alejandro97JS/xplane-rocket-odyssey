@@ -23,7 +23,7 @@ An educational browser game in which physics, not a lookup table, decides the ou
 
 <br>
 
-<img src="docs/screenshots/title.webp" alt="Title screen of Rocket Odyssey with the Start mission and Free exploration buttons, three rockets and the four stages of play: design, balance, simulate, learn." width="100%">
+<img src="docs/screenshots/title.webp" alt="Title screen of Rocket Odyssey with the Start mission button, three rockets and the four stages of play: design, balance, simulate, learn." width="100%">
 
 </div>
 
@@ -84,7 +84,7 @@ Planning has five steps. The player can move freely between them, and the budget
   <tr>
     <td width="50%" valign="top">
       <img src="docs/screenshots/step-mission.webp" alt="Step 1, Mission type: six cards, one per contract with its budget, and a card for free exploration." width="100%">
-      <p><b>1. Mission.</b> Choose a contract. Each one has a client, a goal and a maximum budget.</p>
+      <p><b>1. Mission.</b> Choose a contract. Each one has a client, a goal and a maximum budget. The last card is free exploration.</p>
     </td>
     <td width="50%" valign="top">
       <img src="docs/screenshots/step-payload.webp" alt="Step 2, Equipment and payload: satellite cards with their cost and mass; the telecommunications satellite is selected." width="100%">
@@ -142,7 +142,7 @@ Every flight is judged against five rules, in the order they matter in flight: *
 
 ## Free exploration
 
-No contract, no budget and no score. Choose any payloads, any orbit and any rocket, whatever they cost. The cost is still shown, but physics is the only judge: payload mass, delta-v and radiation can still end the flight.
+No contract, no budget and no score. Choose it as the last card of step 1, after the five contracts. Then choose any payloads, any orbit and any rocket, whatever they cost. The cost is still shown, but physics is the only judge: payload mass, delta-v and radiation can still end the flight.
 
 <p align="center">
   <img src="docs/screenshots/free-exploration.webp" alt="Free exploration: Starship has delivered a shielded capsule and three station modules to low Earth orbit; mission accomplished." width="85%">

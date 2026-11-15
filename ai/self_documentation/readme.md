@@ -14,7 +14,7 @@ All images are in `docs/screenshots`. They were captured in the dark colour sche
 
 | File | Screen | Design and moment | Viewport |
 | --- | --- | --- | --- |
-| `title.webp` | Title screen | Fresh session, nothing completed | 1440 × 900 |
+| `title.webp` | Title screen | Fresh session, nothing completed. Captured again on 2026-11-15 | 1440 × 900 |
 | `step-mission.webp` | Step 1, Mission | Mission 3 selected | 1440 × 900 |
 | `step-payload.webp` | Step 2, Equipment & payload | Mission 3, Telecommunications Satellite | 1440 × 900 |
 | `step-orbit.webp` | Step 3, Orbit | Same, Geostationary Orbit | 1440 × 900 |
@@ -24,7 +24,7 @@ All images are in `docs/screenshots`. They were captured in the dark colour sche
 | `debrief-success.webp` | Debrief, success | Same design, score 88 | 1440 wide, grown to the height of the page |
 | `debrief-failure.webp` | Debrief, failure | Mission 4, Classic Orbital Capsule, Geostationary Orbit, Falcon 9: crew exposed to radiation. Animation skipped | 1440 wide, grown to the height of the page |
 | `free-exploration.webp` | Launch in free exploration | Heavy Shielded Capsule, Docking & Power Module, Scientific Laboratory Module and Habitat Module, Low Earth Orbit, Starship; about 40 seconds into the animation, after the deployment | 1440 × 1160, cropped to the top 1046 pixels |
-| `phone-title.webp` | Title screen on a phone | Fresh session | 390 × 844, device scale 2, mobile and touch |
+| `phone-title.webp` | Title screen on a phone | Fresh session. Captured again on 2026-11-15 | 390 × 844, device scale 2, mobile and touch |
 | `phone-orbit.webp` | Step 3 on a phone | Mission 4, Medium Earth Orbit selected, scrolled to the top | 390 × 844, device scale 2 |
 | `phone-launch.webp` | Launch on a phone | Mission 2, Earth Observation Pack, Polar LEO / SSO, Soyuz; about 7 seconds into the animation, at liftoff | 390 × 844, device scale 2 |
 | `launch.gif` | Launch canvas, animated | Mission 2, Earth Observation Pack, Polar LEO / SSO, Soyuz; the whole flight | 1440 × 900, cropped to the canvas |
@@ -36,6 +36,12 @@ The screenshots were saved as PNG and converted to WebP with Pillow, quality 90 
 The GIF was made from the frames of the Chrome screencast (`Page.startScreencast` over CDP, JPEG quality 95), because the video recording of Playwright needs an ffmpeg of its own that is not installed. The frames were joined with the ffmpeg of the machine using their real timestamps, cropped to the canvas (680 × 382 pixels at 199, 227), trimmed of the first 2.5 seconds of the countdown, sped up 1.35 times, reduced to 15 frames per second and 640 pixels wide, and encoded with a palette of 128 colours and Bayer dithering. It lasts about 24 seconds and weighs 4.2 MB. An animated WebP of the same flight weighed 1.4 MB, but GIF was kept because every viewer shows it.
 
 The capture scripts were written for that session and are not in the repository.
+
+## Captured again
+
+| Date | Images | Why |
+| --- | --- | --- |
+| 2026-11-15 | `title.webp`, `phone-title.webp` | The "Free exploration" button was removed from the title screen. Captured as above, after the fonts loaded and 1.5 seconds for the entrance fade. The alt text of `title.webp` and the text of step 1 and of free exploration in the README were updated to match. The other images do not show the title screen and were kept. |
 
 ## Checks
 

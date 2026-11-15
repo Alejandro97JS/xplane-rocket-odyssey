@@ -177,6 +177,20 @@ test.describe('use case 1: launch', () => {
 });
 
 test.describe('free exploration', () => {
+  test('is chosen in the first step, not on the title screen', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('link', { name: 'Start mission' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Free exploration/ })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /Free exploration/ })).toHaveCount(0);
+
+    await startExploring(page);
+    // Back on the title screen, the way in leaves the mode as the player chose it.
+    await page.getByRole('link', { name: /Back to the title screen/ }).click();
+    await page.getByRole('link', { name: 'Continue planning' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Mission type' })).toBeVisible();
+    await expect(page.getByRole('radio', { name: /Free exploration/ })).toBeChecked();
+  });
+
   test('any design can be chosen whatever it costs, and only physics judges it', async ({
     page,
   }) => {

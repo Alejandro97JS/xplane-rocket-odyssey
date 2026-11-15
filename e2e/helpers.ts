@@ -46,10 +46,14 @@ export async function startPlanning(page: Page): Promise<void> {
   await expect(page.getByRole('heading', { level: 1, name: 'Mission type' })).toBeVisible();
 }
 
-/** Opens the game and enters free exploration, which starts on the payload step. */
+/**
+ * Opens the game, chooses free exploration in the first step, where it is
+ * chosen, and goes on to the payload step.
+ */
 export async function startExploring(page: Page): Promise<void> {
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Free exploration' }).click();
+  await startPlanning(page);
+  await chooseRadio(page, /Free exploration/);
+  await next(page);
   await expect(page.getByRole('heading', { level: 1, name: 'Equipment & payload' })).toBeVisible();
 }
 

@@ -6,7 +6,7 @@ Use case 1, the launch, is implemented end to end: a title screen, five planning
 
 | Address | Screen | What the player does |
 | --- | --- | --- |
-| `/` | Title screen | Reads what the game is and starts a contract or free exploration. |
+| `/` | Title screen | Reads what the game is and opens step 1, where a contract or free exploration is chosen. |
 | `/plan/mission` | 1. Mission type | Chooses one of the five contracts, or free exploration, and reads its briefing and budget. |
 | `/plan/payload` | 2. Equipment & payload | Selects any number of the twelve payloads. Cost and mass add up as they change. |
 | `/plan/orbit` | 3. Orbit selection | Chooses one of the five orbits and sees its path and the delta-v it needs. |
@@ -102,8 +102,8 @@ Checked on 2026-11-15 in Chrome, in free exploration, with a medium orbit, a geo
 
 | Command | What runs | Latest result |
 | --- | --- | --- |
-| `npm test` | 247 unit tests: tables against the use case, physics, one case per failure and per valid path, every flight ending, the shape of the climb to the apogee, the score and the optimal design of each level, free exploration, reducer, serialization, playback mapping, rocket drawings, the scores of the result music, server. | All pass on 2026-11-15, after the climb to the apogee was changed. |
-| `npm run test:e2e` | 28 Playwright tests in Chrome against the production build: gameplay, free exploration, keyboard only, reduced motion, axe on every screen, reflow at 320 pixels, the result music and the sound button. | All pass on 2026-11-15, after the climb to the apogee was changed. |
+| `npm test` | 247 unit tests: tables against the use case, physics, one case per failure and per valid path, every flight ending, the shape of the climb to the apogee, the score and the optimal design of each level, free exploration, reducer, serialization, playback mapping, rocket drawings, the scores of the result music, server. | All pass on 2026-11-15, the last time after the free exploration button was removed from the title screen. |
+| `npm run test:e2e` | 29 Playwright tests in Chrome against the production build: gameplay, free exploration, keyboard only, reduced motion, axe on every screen, reflow at 320 pixels, the result music and the sound button. | All pass on 2026-11-15, the last time after the free exploration button was removed from the title screen. |
 | `npm run typecheck` | TypeScript strict in the three packages and the end-to-end tests. | No errors. |
 | `npm run lint` | ESLint with `typescript-eslint`, `jsx-a11y` and the rules of hooks. | No errors. |
 
