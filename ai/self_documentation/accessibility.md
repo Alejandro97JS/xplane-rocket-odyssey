@@ -15,7 +15,8 @@ The target is WCAG 2.1 AA. This document records what was done to meet it, what 
 | Focus visible (2.4.7) | One focus style everywhere: a white 3-pixel outline with an offset. Controls drawn with cut corners keep the outline on an element that is not clipped. |
 | Focus order and screen changes (2.4.3) | When the player moves to another screen, focus goes to its `<h1>` and the document title changes. The first screen is left alone, so the first Tab reaches the skip link. |
 | Bypass blocks (2.4.1) | "Skip to main content" is the first Tab stop. |
-| Contrast (1.4.3, 1.4.11) | Text and control colours are tokens in `apps/web/src/styles/index.css`, chosen against the panel fill. Panels have an opaque fill. The only text outside a panel is the header, at the top of the page, where the backdrop is at its darkest; captions over the canvas have a dark plate of their own. |
+| Landmarks (1.3.1) | Each screen has a header, its `main` and, at the bottom, the credits banner as a `footer` (`contentinfo`), outside `main`. See [credits_banner.md](credits_banner.md). |
+| Contrast (1.4.3, 1.4.11) | Text and control colours are tokens in `apps/web/src/styles/index.css`, chosen against the panel fill. Panels have an opaque fill. The only text outside a panel is the header, at the top of the page, where the backdrop is at its darkest, and the credits banner at the bottom, which has an opaque fill of its own over the rim of the Earth (14.3:1); captions over the canvas have a dark plate of their own. |
 | Colour is not the only cue (1.4.1) | Over budget, over capacity, passed and failed all carry an icon and words. The two stages in the delta-v chart are named in a legend and labelled with their amounts; their colours were checked for colour-blind separation. |
 | Reflow (1.4.10) | Every screen fits a 320-pixel-wide screen without scrolling sideways. A test checks it. |
 | Label in name (2.5.3) | The accessible name of each control contains its visible text. |

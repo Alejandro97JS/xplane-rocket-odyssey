@@ -42,6 +42,7 @@ The capture scripts were written for that session and are not in the repository.
 | Date | Images | Why |
 | --- | --- | --- |
 | 2026-11-15 | `title.webp`, `phone-title.webp` | The "Free exploration" button was removed from the title screen. Captured as above, after the fonts loaded and 1.5 seconds for the entrance fade. The alt text of `title.webp` and the text of step 1 and of free exploration in the README were updated to match. The other images do not show the title screen and were kept. |
+| 2026-11-15 | `debrief-success.webp`, `debrief-failure.webp` | The credits banner was added at the bottom of every screen. Captured as above, 1.5 seconds after the debrief opened; each is now 37 pixels taller (1440 × 1591 and 1440 × 1301). The banner also shows in the bottom of `title.webp`, which is captured again with the "How to play" change to the title screen. The other images end above the bottom of the page and were kept; the positions measured are in [credits_banner.md](credits_banner.md). |
 
 ## Checks
 

@@ -313,3 +313,34 @@ test.describe('reduced motion', () => {
     await expect(page.getByRole('img', { name: /Animation of the launch/ })).toBeVisible();
   });
 });
+
+test.describe('credits banner', () => {
+  test('every screen ends with who made the game and the challenge it takes part in', async ({
+    page,
+  }) => {
+    const expectBanner = async () => {
+      const banner = page.getByRole('contentinfo');
+      await expect(banner).toHaveCount(1);
+      await expect(banner).toContainText('Made by the XPlane team');
+      await expect(banner).toContainText(
+        'Taking part in the NASA Space Apps Challenge, Salamanca (Spain) local event',
+      );
+    };
+
+    await page.goto('/');
+    await expectBanner();
+
+    await planMission(page, LEVEL_1_WIN);
+    await expectBanner();
+
+    await launch(page);
+    await expectBanner();
+
+    await page.getByRole('link', { name: 'Skip to debrief' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Mission debrief' })).toBeVisible();
+    await expectBanner();
+
+    await page.goto('/nowhere');
+    await expectBanner();
+  });
+});

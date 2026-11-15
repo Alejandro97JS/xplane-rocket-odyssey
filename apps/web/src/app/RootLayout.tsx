@@ -1,10 +1,12 @@
 import { RouterProvider } from 'react-aria-components';
 import { Outlet, useHref, useNavigate } from 'react-router';
 import { Backdrop } from '../components/Backdrop.tsx';
+import { CreditsBanner } from '../components/CreditsBanner.tsx';
 
 /**
- * Shared by every screen: the space backdrop, a skip link and the bridge that
- * lets React Aria links navigate through the client-side router.
+ * Shared by every screen: the space backdrop, a skip link, the credits banner
+ * at the bottom and the bridge that lets React Aria links navigate through the
+ * client-side router.
  */
 export function RootLayout() {
   const navigate = useNavigate();
@@ -17,8 +19,11 @@ export function RootLayout() {
         Skip to main content
       </a>
       <Backdrop />
-      <div className="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-5 sm:px-6 sm:py-7">
-        <Outlet />
+      <div className="flex min-h-dvh flex-col">
+        <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-5 sm:px-6 sm:py-7">
+          <Outlet />
+        </div>
+        <CreditsBanner />
       </div>
     </RouterProvider>
   );
