@@ -14,7 +14,7 @@ All images are in `docs/screenshots`. They were captured in the dark colour sche
 
 | File | Screen | Design and moment | Viewport |
 | --- | --- | --- | --- |
-| `title.webp` | Title screen | Fresh session, nothing completed. Captured again on 2026-11-15 | 1440 × 900 |
+| `title.webp` | Title screen | Fresh session, nothing completed, with the "How to play" button and the credits banner. Captured again on 2026-11-15 | 1440 × 900 |
 | `step-mission.webp` | Step 1, Mission | Mission 3 selected | 1440 × 900 |
 | `step-payload.webp` | Step 2, Equipment & payload | Mission 3, Telecommunications Satellite | 1440 × 900 |
 | `step-orbit.webp` | Step 3, Orbit | Same, Geostationary Orbit | 1440 × 900 |
@@ -24,7 +24,7 @@ All images are in `docs/screenshots`. They were captured in the dark colour sche
 | `debrief-success.webp` | Debrief, success | Same design, score 88 | 1440 wide, grown to the height of the page |
 | `debrief-failure.webp` | Debrief, failure | Mission 4, Classic Orbital Capsule, Geostationary Orbit, Falcon 9: crew exposed to radiation. Animation skipped | 1440 wide, grown to the height of the page |
 | `free-exploration.webp` | Launch in free exploration | Heavy Shielded Capsule, Docking & Power Module, Scientific Laboratory Module and Habitat Module, Low Earth Orbit, Starship; about 40 seconds into the animation, after the deployment | 1440 × 1160, cropped to the top 1046 pixels |
-| `phone-title.webp` | Title screen on a phone | Fresh session. Captured again on 2026-11-15 | 390 × 844, device scale 2, mobile and touch |
+| `phone-title.webp` | Title screen on a phone | Fresh session, with the "How to play" button. Captured again on 2026-11-15 | 390 × 844, device scale 2, mobile and touch |
 | `phone-orbit.webp` | Step 3 on a phone | Mission 4, Medium Earth Orbit selected, scrolled to the top | 390 × 844, device scale 2 |
 | `phone-launch.webp` | Launch on a phone | Mission 2, Earth Observation Pack, Polar LEO / SSO, Soyuz; about 7 seconds into the animation, at liftoff | 390 × 844, device scale 2 |
 | `launch.gif` | Launch canvas, animated | Mission 2, Earth Observation Pack, Polar LEO / SSO, Soyuz; the whole flight | 1440 × 900, cropped to the canvas |
@@ -43,6 +43,7 @@ The capture scripts were written for that session and are not in the repository.
 | --- | --- | --- |
 | 2026-11-15 | `title.webp`, `phone-title.webp` | The "Free exploration" button was removed from the title screen. Captured as above, after the fonts loaded and 1.5 seconds for the entrance fade. The alt text of `title.webp` and the text of step 1 and of free exploration in the README were updated to match. The other images do not show the title screen and were kept. |
 | 2026-11-15 | `debrief-success.webp`, `debrief-failure.webp` | The credits banner was added at the bottom of every screen. Captured as above, 1.5 seconds after the debrief opened; each is now 37 pixels taller (1440 × 1591 and 1440 × 1301). The banner also shows in the bottom of `title.webp`, which is captured again with the "How to play" change to the title screen. The other images end above the bottom of the page and were kept; the positions measured are in [credits_banner.md](credits_banner.md). |
+| 2026-11-15 | `title.webp`, `phone-title.webp` | A "How to play" button was added next to "Start mission" on the title screen, and the caption moved under both buttons. Captured as above, after the fonts loaded and 1.5 seconds for the entrance fade, from the production build of commit `5e5d7a0` with the "How to play" changes, served on another port (3217) because another session was using 3200. `title.webp` now also shows the credits banner at its bottom; on the phone the banner is below the fold. The alt text of `title.webp` in the README was updated, and the README mentions the guide. The guide itself has no screenshot in the README. The other images do not show the title screen and were kept. |
 
 ## Checks
 

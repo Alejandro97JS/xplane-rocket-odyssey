@@ -25,6 +25,12 @@ test.describe('automated accessibility checks', () => {
     await expectNoAccessibilityViolations(page);
   });
 
+  test('how to play', async ({ page }) => {
+    await page.goto('/how-to-play');
+    await expect(page.getByRole('heading', { level: 1, name: 'How to play' })).toBeVisible();
+    await expectNoAccessibilityViolations(page);
+  });
+
   test('every planning step, empty and filled in', async ({ page }) => {
     await startPlanning(page);
     await expectNoAccessibilityViolations(page);
@@ -182,6 +188,14 @@ test.describe('small screens', () => {
     await expectNoSidewaysScroll(page);
     await page.getByRole('link', { name: 'View mission debrief' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Mission debrief' })).toBeVisible();
+    await expectNoSidewaysScroll(page);
+    await expectNoAccessibilityViolations(page);
+  });
+
+  test('how to play fits a 320 pixel wide screen', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('link', { name: 'How to play' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'How to play' })).toBeVisible();
     await expectNoSidewaysScroll(page);
     await expectNoAccessibilityViolations(page);
   });

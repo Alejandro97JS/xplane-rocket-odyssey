@@ -41,11 +41,19 @@ export interface OptimalDesign {
   readonly reserve: number;
 }
 
-const OBJECTIVE_POINTS = 60;
-const BUDGET_POINTS = 25;
-const MARGIN_POINTS = 15;
-const THREE_STARS = 80;
-const TWO_STARS = 65;
+/**
+ * The most points each part of the score can earn. They add up to 100. The
+ * "How to play" guide of the client explains the score with these numbers.
+ */
+export const SCORE_POINTS = { objective: 60, budget: 25, margin: 15 } as const;
+/** The lowest total that earns three stars, and two. Any other success earns one. */
+export const STAR_THRESHOLDS = { three: 80, two: 65 } as const;
+
+const OBJECTIVE_POINTS = SCORE_POINTS.objective;
+const BUDGET_POINTS = SCORE_POINTS.budget;
+const MARGIN_POINTS = SCORE_POINTS.margin;
+const THREE_STARS = STAR_THRESHOLDS.three;
+const TWO_STARS = STAR_THRESHOLDS.two;
 
 /**
  * Scores a successful mission against the optimal design of its level. The

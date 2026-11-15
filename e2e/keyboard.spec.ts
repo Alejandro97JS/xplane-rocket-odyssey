@@ -83,6 +83,29 @@ test('the whole level can be played with the keyboard alone', async ({ page }) =
   await expectHeadingFocused(page, 'Mission type');
 });
 
+test('the guide can be opened, read and left with the keyboard alone', async ({ page }) => {
+  await page.goto('/');
+  await tabTo(page, 'link', 'How to play');
+  await page.keyboard.press('Enter');
+  await expectHeadingFocused(page, 'How to play');
+
+  // An entry of the contents takes focus to the heading of its section, so a
+  // screen reader reads it and the next Tab goes on from there.
+  await tabTo(page, 'link', /^Rules$/);
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/#rules$/);
+  const section = page.getByRole('heading', { level: 2, name: 'What decides the flight' });
+  await expect(section).toBeFocused();
+  await expect(section).toBeInViewport();
+  // The title of the screen stays, since the screen has not changed.
+  await expect(page).toHaveTitle('How to play · Rocket Odyssey');
+
+  // The way out at the end of the guide leads to the first planning step.
+  await tabTo(page, 'link', 'Start mission');
+  await page.keyboard.press('Enter');
+  await expectHeadingFocused(page, 'Mission type');
+});
+
 test('free exploration can be entered and left with the keyboard alone', async ({ page }) => {
   await page.goto('/');
   await tabTo(page, 'link', 'Start mission');

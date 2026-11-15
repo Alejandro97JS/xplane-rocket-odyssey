@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
+import { HowToPlayScreen } from '../screens/HowToPlayScreen.tsx';
 import { MissionStep } from '../screens/MissionStep.tsx';
 import { NotFoundScreen } from '../screens/NotFoundScreen.tsx';
 import { OrbitStep } from '../screens/OrbitStep.tsx';
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       { path: '/', element: <WelcomeScreen /> },
+      { path: '/how-to-play', element: <HowToPlayScreen /> },
       {
         path: '/plan',
         element: <PlannerLayout />,

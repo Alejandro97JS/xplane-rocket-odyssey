@@ -7,6 +7,7 @@ It is mandatory to read ai/standards/free_exploration.md with the rules of the f
 It is mandatory to read ai/standards/result_music.md with the rules of the music of the result before changing the sound or the music of the game.
 It is mandatory to read ai/standards/readme.md with the rules for keeping the README and its screenshots up to date before changing any screen of the game.
 It is mandatory to read ai/standards/credits_banner.md with the rules of the credits banner at the bottom of every screen before changing that banner or the layout shared by every screen.
+It is mandatory to read ai/standards/how_to_play.md with the rules of the help about the game before changing the title screen or the "How to play" guide, and before changing a rule, a table or a control that the guide explains.
 Adittionally, inside the ai folder there are files about each use case we want to consider, you should read them if needed.
 It is mandatory that you document everything that happens in this repository, inside de ai/self_documentation folder. You can organize the files and folder inside ai/self_documentation as you want. Keep ai/self_documentation/base.md as an index and update it in the same session as each change. You can read that folder and everything else from the repository when you want, if needed.
 You have examples for the user interface inside the ai/ui_mockups folder.

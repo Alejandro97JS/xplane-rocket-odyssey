@@ -23,7 +23,7 @@ An educational browser game in which physics, not a lookup table, decides the ou
 
 <br>
 
-<img src="docs/screenshots/title.webp" alt="Title screen of Rocket Odyssey with the Start mission button, three rockets and the four stages of play: design, balance, simulate, learn." width="100%">
+<img src="docs/screenshots/title.webp" alt="Title screen of Rocket Odyssey with the Start mission and How to play buttons, three rockets, the four stages of play (design, balance, simulate, learn) and the credits banner at the bottom." width="100%">
 
 </div>
 
@@ -77,6 +77,8 @@ The game never just marks a design right or wrong. The debrief explains what hap
 </table>
 
 ## How a mission plays
+
+New players can open **How to play** from the title screen: one page with the goal, the steps of a mission, the rules that decide a flight, the score, free exploration, the key ideas in plain words, the controls and a few tips.
 
 Planning has five steps. The player can move freely between them, and the budget meter in the header updates with every choice.
 

@@ -58,6 +58,23 @@ export const InfoIcon = (p: IconProps) => (
     <path d="M12 11v6M12 7.6v.1" />
   </Icon>
 );
+export const HelpIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.4 9.3a2.7 2.7 0 0 1 5.2 1c0 1.8-2.6 2.2-2.6 4M12 17.4v.1" />
+  </Icon>
+);
+export const BookIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 6.5C10.2 5.2 7.7 4.5 3.5 4.5v13c4.2 0 6.7.7 8.5 2 1.8-1.3 4.3-2 8.5-2v-13c-4.2 0-6.7.7-8.5 2zM12 6.5v13" />
+  </Icon>
+);
+export const KeyboardIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="2.5" y="6" width="19" height="12" rx="2" />
+    <path d="M6.5 10h.1M10 10h.1M13.5 10h.1M17 10h.1M8 14h8" />
+  </Icon>
+);
 export const CoinIcon = (p: IconProps) => (
   <Icon {...p}>
     <circle cx="12" cy="12" r="9" />

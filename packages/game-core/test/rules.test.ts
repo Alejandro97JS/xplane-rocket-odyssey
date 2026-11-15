@@ -5,6 +5,8 @@ import {
   findOptimalDesign,
   HINTS,
   roundTotal,
+  SCORE_POINTS,
+  STAR_THRESHOLDS,
   LEVELS,
   ORBITS,
   PAYLOADS,
@@ -538,6 +540,15 @@ describe('levels', () => {
 });
 
 describe('computeScore', () => {
+  it('splits 100 points between the parts it publishes', () => {
+    const { objective, budget, margin } = SCORE_POINTS;
+    expect(objective + budget + margin).toBe(100);
+    // The objective points alone, which every success earns, are one star:
+    // more stars need money saved or delta-v in reserve.
+    expect(STAR_THRESHOLDS.two).toBeGreaterThan(objective);
+    expect(STAR_THRESHOLDS.three).toBeGreaterThan(STAR_THRESHOLDS.two);
+  });
+
   it('gives no score to a failed mission', () => {
     const evaluation = evaluateMission('first_space_data', design(['cubesat'], 'leo', 'soyuz'));
     expect(computeScore(evaluation)).toBeNull();

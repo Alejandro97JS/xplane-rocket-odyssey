@@ -13,7 +13,7 @@ The target is WCAG 2.1 AA. This document records what was done to meet it, what 
 | Flashes (2.3.1) | Nothing flashes. The breakup is one fireball that swells once and fades. The beacon after a hold is steady. |
 | Keyboard (2.1.1) | Every control is reachable and usable with the keyboard. Option cards are real radio buttons and checkboxes: Tab enters a group, arrows move inside it, Space selects. The warning dialog traps focus and closes with Escape. A test plays the whole level with the keyboard alone. |
 | Focus visible (2.4.7) | One focus style everywhere: a white 3-pixel outline with an offset. Controls drawn with cut corners keep the outline on an element that is not clipped. |
-| Focus order and screen changes (2.4.3) | When the player moves to another screen, focus goes to its `<h1>` and the document title changes. The first screen is left alone, so the first Tab reaches the skip link. |
+| Focus order and screen changes (2.4.3) | When the player moves to another screen, focus goes to its `<h1>` and the document title changes. The first screen is left alone, so the first Tab reaches the skip link. In the "How to play" guide, an entry of the contents moves focus to the `<h2>` of its section, without changing the screen or the title. See [how_to_play.md](how_to_play.md). |
 | Bypass blocks (2.4.1) | "Skip to main content" is the first Tab stop. |
 | Landmarks (1.3.1) | Each screen has a header, its `main` and, at the bottom, the credits banner as a `footer` (`contentinfo`), outside `main`. See [credits_banner.md](credits_banner.md). |
 | Contrast (1.4.3, 1.4.11) | Text and control colours are tokens in `apps/web/src/styles/index.css`, chosen against the panel fill. Panels have an opaque fill. The only text outside a panel is the header, at the top of the page, where the backdrop is at its darkest, and the credits banner at the bottom, which has an opaque fill of its own over the rim of the Earth (14.3:1); captions over the canvas have a dark plate of their own. |
@@ -29,6 +29,8 @@ The target is WCAG 2.1 AA. This document records what was done to meet it, what 
 `npm run test:e2e` runs axe with the WCAG 2.0 and 2.1 A and AA rules on: the title screen; each of the five steps, empty and filled in; the summary with nothing chosen; the over-budget alert and its dialog; the launch as a list of steps; the animated launch, paused; the debrief after a success and after a failure; the page for an unknown address; and the debrief at 320 pixels. Since 2026-11-14 it also covers free exploration: the payload step with the cost in the header, step 1 with the free exploration card selected, the summary, the debrief, and step 1 at 320 pixels.
 
 Since 2026-11-14 the run also checks that the debrief has its sound button in the header, and that the button mutes the launch too.
+
+Since 2026-11-15 it also covers the "How to play" guide: axe on it, the guide at 320 pixels with axe and the check for sideways scrolling, and a test that opens it from the title screen, follows an entry of its contents and leaves it for step 1 with the keyboard alone.
 
 The same run plays the level with the keyboard alone, enters free exploration with the keyboard from step 1 and moves between it and the contracts with the arrow keys, checks the dialog focus trap and checks reflow at 320 pixels on every screen. The decisions about the accessibility of free exploration are in [free_exploration.md](free_exploration.md).
 

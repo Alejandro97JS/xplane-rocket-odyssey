@@ -4,7 +4,7 @@ import { getStep } from '../app/steps.ts';
 import { RocketSvg } from '../art/RocketSvg.tsx';
 import { ActionButton } from '../components/ActionButton.tsx';
 import { Frame } from '../components/Frame.tsx';
-import { ChevronRightIcon } from '../components/icons.tsx';
+import { ChevronRightIcon, HelpIcon } from '../components/icons.tsx';
 import { Logo } from '../components/Logo.tsx';
 import { usePageHeading } from '../lib/usePageHeading.ts';
 
@@ -28,9 +28,10 @@ const LOOP = [
 ];
 
 /**
- * The title screen: the name of the game, what it is about and one way in, to
- * the first planning step. Free exploration is chosen there, next to the
- * contracts, not here (rule 4 of `ai/standards/free_exploration.md`).
+ * The title screen: the name of the game, what it is about, one way in, to
+ * the first planning step, and the way to the guide, "How to play"
+ * (`ai/standards/how_to_play.md`). Free exploration is chosen in step 1, next
+ * to the contracts, not here (rule 4 of `ai/standards/free_exploration.md`).
  */
 export function WelcomeScreen() {
   const headingRef = usePageHeading('Welcome');
@@ -61,16 +62,23 @@ export function WelcomeScreen() {
               find out if your design reaches orbit.
             </p>
 
-            <div className="mt-9 max-w-md">
-              <ActionButton
-                variant="primary"
-                href={getStep('mission').path}
-                aria-describedby="contracts-caption"
-                className="!min-h-16 w-full !px-6 !text-xl sm:w-96 sm:!text-2xl"
-              >
-                {planningStarted ? 'Continue planning' : 'Start mission'}
-                <ChevronRightIcon />
-              </ActionButton>
+            {/* The way in and, beside it, the guide for a first-time player. */}
+            <div className="mt-9">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <ActionButton
+                  variant="primary"
+                  href={getStep('mission').path}
+                  aria-describedby="contracts-caption"
+                  className="!min-h-16 !px-6 !text-xl sm:w-96 sm:!text-2xl"
+                >
+                  {planningStarted ? 'Continue planning' : 'Start mission'}
+                  <ChevronRightIcon />
+                </ActionButton>
+                <ActionButton variant="secondary" href="/how-to-play" className="!min-h-16 !px-6">
+                  <HelpIcon width="1.4em" height="1.4em" />
+                  How to play
+                </ActionButton>
+              </div>
               <p id="contracts-caption" className="mt-2 text-ink-soft">
                 {LEVELS.length} contracts, each with a client and a budget{' '}
                 <span className="whitespace-nowrap">· {completed} completed</span>
