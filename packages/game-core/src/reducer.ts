@@ -55,7 +55,14 @@ export function reduce(state: GameState, action: Action): GameState {
 
     case 'level/select':
       if (state.mode === 'contract' && state.levelId === action.levelId) return state;
-      return { ...state, mode: 'contract', levelId: action.levelId };
+      return {
+        ...state,
+        mode: 'contract',
+        levelId: action.levelId,
+        // A warning read against the budget of another contract does not count for this one.
+        budgetWarningDismissedAtUsd:
+          state.levelId === action.levelId ? state.budgetWarningDismissedAtUsd : null,
+      };
 
     case 'level/start':
       return {

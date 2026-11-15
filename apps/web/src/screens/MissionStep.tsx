@@ -134,11 +134,13 @@ export function MissionStep() {
 function MissionCard({ level }: { level: LevelSpec }) {
   const record = useGame((state) => selectRecord(state, level.id));
   const detailsId = `mission-${level.id}-details`;
+  const recordId = `mission-${level.id}-record`;
   return (
     <RadioCard
       value={level.id}
       name={`Mission ${level.number}: ${level.title}`}
-      describedBy={detailsId}
+      // The record is part of the description, so screen readers hear it too.
+      describedBy={record.completed ? `${detailsId} ${recordId}` : detailsId}
     >
       <div className={ART_CLIP}>
         <MissionArt scene={level.id} className="block aspect-[2/1] w-full" />
@@ -146,9 +148,12 @@ function MissionCard({ level }: { level: LevelSpec }) {
           <Tick round />
         </div>
         {record.completed && (
-          <p className="absolute left-2.5 top-2.5 flex items-center gap-1 rounded-full bg-space-950/85 px-2.5 py-1 text-sm font-bold text-go">
+          <p
+            id={recordId}
+            className="absolute left-2.5 top-2.5 flex items-center gap-1 rounded-full bg-space-950/85 px-2.5 py-1 text-sm font-bold text-go"
+          >
             <StarIcon filled width="1em" height="1em" />
-            Completed · {record.bestScore}
+            Completed · best {record.bestScore}
           </p>
         )}
       </div>

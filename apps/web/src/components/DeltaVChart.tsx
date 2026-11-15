@@ -42,7 +42,8 @@ export function DeltaVChart({ deltaV, orbitName }: DeltaVChartProps) {
             <div
               key={stage.name}
               title={`${stage.name}: ${formatSpeed(stage.deltaVMs)}`}
-              className="grid h-full min-w-0 place-items-center overflow-hidden rounded-[4px] px-1"
+              // In forced colours the stages keep their own colours, which the legend names.
+              className="grid h-full min-w-0 place-items-center overflow-hidden rounded-[4px] px-1 forced-colors:forced-color-adjust-none"
               style={{ width: share(stage.deltaVMs), backgroundColor: STAGE_COLORS[index] }}
             >
               {stage.deltaVMs / domain > 0.16 && (
@@ -55,7 +56,7 @@ export function DeltaVChart({ deltaV, orbitName }: DeltaVChartProps) {
         </div>
         {/* The limit: what the orbit needs. */}
         <div
-          className="absolute -bottom-1.5 -top-1.5 w-0.5 bg-ink"
+          className="absolute -bottom-1.5 -top-1.5 w-0.5 bg-ink forced-colors:bg-[CanvasText]"
           style={{ left: `${requiredShare}%` }}
         />
         <p

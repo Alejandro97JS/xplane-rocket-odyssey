@@ -179,6 +179,7 @@ The target is WCAG 2.1 AA, and a canvas is invisible to assistive technology, so
 - **Control over time and sound.** The launch can be paused, restarted and skipped. One remembered setting mutes the engines and the music.
 - **Keyboard first.** Option cards are real radio buttons and checkboxes, dialogs trap focus, and focus moves to the heading of each new screen.
 - **No flashing.** Nothing flashes more than three times per second, including explosions.
+- **High contrast.** In Windows High Contrast and other forced-colour themes, panels, buttons, the chosen cards and the meters keep their outlines and fills.
 - **Checked automatically.** The end-to-end tests run axe on every screen and play a whole mission with the keyboard alone.
 
 <p align="center">

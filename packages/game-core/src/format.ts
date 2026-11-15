@@ -70,6 +70,19 @@ export function formatList(items: readonly string[]): string {
 }
 
 /**
+ * The form that agrees with a subject of `count` things, so a sentence about
+ * several payloads reads "the core module and laboratory module separate".
+ */
+export function agree(count: number, singular: string, plural: string): string {
+  return count === 1 ? singular : plural;
+}
+
+/** Who was on board: "the astronaut" for one, "the crew of 4" for more. */
+export function crewOf(count: number): string {
+  return count === 1 ? 'the astronaut' : `the crew of ${count}`;
+}
+
+/**
  * Lowercases the first letter so a name can be used in the middle of a
  * sentence. Acronyms such as "SAR" are left alone.
  */
@@ -80,4 +93,9 @@ export function lowerFirst(text: string): string {
     return text;
   }
   return first.toLowerCase() + text.slice(1);
+}
+
+/** Uppercases the first letter, so a phrase can start a sentence. */
+export function upperFirst(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }

@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
+import { ErrorScreen } from '../screens/ErrorScreen.tsx';
 import { HowToPlayScreen } from '../screens/HowToPlayScreen.tsx';
 import { MissionStep } from '../screens/MissionStep.tsx';
 import { NotFoundScreen } from '../screens/NotFoundScreen.tsx';
@@ -21,48 +22,59 @@ const DebriefScreen = lazy(() =>
 
 function Loading() {
   return (
-    <p role="status" className="display py-24 text-center text-2xl text-line-bright">
-      Loading mission control…
-    </p>
+    <main id="main" className="flex-1">
+      <p role="status" className="display py-24 text-center text-2xl text-line-bright">
+        Loading mission control…
+      </p>
+    </main>
   );
 }
 
-/** Every screen has its own address, so the back button of the browser works. */
+/**
+ * Every screen has its own address, so the back button of the browser works.
+ * A screen that cannot be shown is replaced by the error screen, inside the
+ * layout shared by every screen.
+ */
 export const router = createBrowserRouter([
   {
     element: <RootLayout />,
     children: [
-      { path: '/', element: <WelcomeScreen /> },
-      { path: '/how-to-play', element: <HowToPlayScreen /> },
       {
-        path: '/plan',
-        element: <PlannerLayout />,
+        errorElement: <ErrorScreen />,
         children: [
-          { index: true, element: <Navigate to="/plan/mission" replace /> },
-          { path: 'mission', element: <MissionStep /> },
-          { path: 'payload', element: <PayloadStep /> },
-          { path: 'orbit', element: <OrbitStep /> },
-          { path: 'rocket', element: <RocketStep /> },
-          { path: 'summary', element: <SummaryStep /> },
+          { path: '/', element: <WelcomeScreen /> },
+          { path: '/how-to-play', element: <HowToPlayScreen /> },
+          {
+            path: '/plan',
+            element: <PlannerLayout />,
+            children: [
+              { index: true, element: <Navigate to="/plan/mission" replace /> },
+              { path: 'mission', element: <MissionStep /> },
+              { path: 'payload', element: <PayloadStep /> },
+              { path: 'orbit', element: <OrbitStep /> },
+              { path: 'rocket', element: <RocketStep /> },
+              { path: 'summary', element: <SummaryStep /> },
+            ],
+          },
+          {
+            path: '/launch',
+            element: (
+              <Suspense fallback={<Loading />}>
+                <LaunchScreen />
+              </Suspense>
+            ),
+          },
+          {
+            path: '/debrief',
+            element: (
+              <Suspense fallback={<Loading />}>
+                <DebriefScreen />
+              </Suspense>
+            ),
+          },
+          { path: '*', element: <NotFoundScreen /> },
         ],
       },
-      {
-        path: '/launch',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <LaunchScreen />
-          </Suspense>
-        ),
-      },
-      {
-        path: '/debrief',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <DebriefScreen />
-          </Suspense>
-        ),
-      },
-      { path: '*', element: <NotFoundScreen /> },
     ],
   },
 ]);

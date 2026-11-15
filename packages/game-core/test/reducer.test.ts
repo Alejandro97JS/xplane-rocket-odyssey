@@ -111,6 +111,26 @@ describe('reduce', () => {
     expect(selectNeedsBudgetWarning(state)).toBe(true);
   });
 
+  it('warns again about the same cost under the budget of another contract', () => {
+    // $125M: over the budget of mission 1 and of mission 2.
+    let state = play([
+      { type: 'level/select', levelId: 'first_space_data' },
+      { type: 'payload/toggle', payloadId: 'telecom' },
+      { type: 'rocket/select', rocketId: 'soyuz' },
+      { type: 'budget/dismissWarning' },
+    ]);
+    expect(selectNeedsBudgetWarning(state)).toBe(false);
+
+    state = reduce(state, { type: 'level/select', levelId: 'environmental_surveillance' });
+    expect(selectNeedsBudgetWarning(state)).toBe(true);
+
+    // Leaving for free exploration and coming back to the same contract keeps it read.
+    state = reduce(state, { type: 'budget/dismissWarning' });
+    state = reduce(state, { type: 'mode/select', mode: 'free_exploration' });
+    state = reduce(state, { type: 'level/select', levelId: 'environmental_surveillance' });
+    expect(selectNeedsBudgetWarning(state)).toBe(false);
+  });
+
   it('reports what is missing before a launch', () => {
     const empty = selectReadiness(createInitialState());
     expect(empty.ready).toBe(false);

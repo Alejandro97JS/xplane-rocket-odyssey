@@ -25,6 +25,9 @@ describe('server without a client build', () => {
   });
 });
 
+/** A script large enough to be worth compressing. */
+const BIG_SCRIPT = 'console.log("launch");\n'.repeat(400);
+
 describe('server with a client build', () => {
   let dir: string;
   let app: ReturnType<typeof createApp>;
@@ -36,6 +39,7 @@ describe('server with a client build', () => {
     await mkdir(path.join(dir, 'assets'));
     await writeFile(path.join(dir, 'index.html'), '<!doctype html><title>Rocket Odyssey</title>');
     await writeFile(path.join(dir, 'assets', 'app-abc123.js'), 'console.log("game")');
+    await writeFile(path.join(dir, 'assets', 'big-def456.js'), BIG_SCRIPT);
     app = createApp({ webDistDir: dir });
   });
 
@@ -48,6 +52,31 @@ describe('server with a client build', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('content-type')).toContain('text/html');
     expect(await response.text()).toContain('Rocket Odyssey');
+  });
+
+  it('never lets a browser keep an old copy of the page', async () => {
+    for (const address of ['/', '/index.html']) {
+      const response = await app.request(address);
+      expect(response.status).toBe(200);
+      expect(response.headers.get('cache-control')).toBe('no-cache');
+    }
+  });
+
+  it('compresses text for browsers that accept gzip', async () => {
+    const response = await app.request('/assets/big-def456.js', {
+      headers: { 'Accept-Encoding': 'gzip' },
+    });
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-encoding')).toBe('gzip');
+    expect(response.headers.get('cache-control')).toContain('immutable');
+    const body = response.body!.pipeThrough(new DecompressionStream('gzip'));
+    expect(await new Response(body).text()).toBe(BIG_SCRIPT);
+  });
+
+  it('sends text as it is to clients that do not accept gzip', async () => {
+    const response = await app.request('/assets/big-def456.js');
+    expect(response.headers.get('content-encoding')).toBeNull();
+    expect(await response.text()).toBe(BIG_SCRIPT);
   });
 
   it('serves built assets with a long cache', async () => {

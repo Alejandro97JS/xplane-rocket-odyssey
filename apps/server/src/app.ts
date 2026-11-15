@@ -1,5 +1,6 @@
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
+import { compress } from 'hono/compress';
 import { secureHeaders } from 'hono/secure-headers';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
@@ -20,6 +21,8 @@ const ONE_YEAR_S = 60 * 60 * 24 * 365;
 export function createApp({ webDistDir }: AppOptions): Hono {
   const app = new Hono();
   app.use(secureHeaders());
+  // Text answers (the page, scripts, styles) shrink to about a third with gzip.
+  app.use(compress());
 
   app.get('/health', (c) => c.json({ status: 'ok' }));
 
@@ -40,13 +43,21 @@ export function createApp({ webDistDir }: AppOptions): Hono {
         c.res.headers.set('Cache-Control', `public, immutable, max-age=${ONE_YEAR_S}`);
       }
     });
+    // The page itself is checked again on every visit, whatever its address,
+    // `/` included. A cached old page would ask for assets that a new
+    // deployment no longer has.
+    app.use('*', async (c, next) => {
+      await next();
+      if (c.res.headers.get('Content-Type')?.startsWith('text/html')) {
+        c.res.headers.set('Cache-Control', 'no-cache');
+      }
+    });
     app.use('*', serveStatic({ root }));
 
     // Every screen of the game has its own address, handled by the client
     // router. Any address that is not a file gets the page of the game.
     app.get('*', async (c) => {
       if (path.extname(c.req.path) !== '') return c.notFound();
-      c.header('Cache-Control', 'no-cache');
       return c.html(await readFile(indexFile, 'utf8'));
     });
   } else {

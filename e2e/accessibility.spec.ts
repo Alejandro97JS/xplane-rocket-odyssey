@@ -143,6 +143,38 @@ test.describe('automated accessibility checks', () => {
   });
 });
 
+test.describe('forced colours', () => {
+  // Windows High Contrast and similar themes replace the colours of the page.
+  test.use({ forcedColors: 'active' });
+
+  test('only the chosen card shows its tick, and bars keep their fill', async ({ page }) => {
+    await startPlanning(page);
+    await chooseRadio(page, /^Mission 1:/);
+    await next(page);
+    await chooseCheckbox(page, /CubeSat/);
+
+    const tick = (name: RegExp) =>
+      page
+        .locator('label', { has: page.getByRole('checkbox', { name }) })
+        .locator('.tick')
+        .evaluate((element) => {
+          const style = getComputedStyle(element);
+          return { mark: style.color, fill: style.backgroundColor };
+        });
+    const chosen = await tick(/CubeSat/);
+    const other = await tick(/Earth Observation/);
+    expect(chosen.mark).not.toBe(chosen.fill);
+    expect(other.mark).toBe(other.fill);
+
+    const meter = page.getByRole('meter', { name: /Budget available/ });
+    const [bar, fill] = await Promise.all([
+      meter.locator('.bar').evaluate((element) => getComputedStyle(element).backgroundColor),
+      meter.locator('.bar__fill').evaluate((element) => getComputedStyle(element).backgroundColor),
+    ]);
+    expect(fill).not.toBe(bar);
+  });
+});
+
 test.describe('launch animation', () => {
   test('animated launch, paused', async ({ page }) => {
     await planMission(page, LEVEL_1_WIN);

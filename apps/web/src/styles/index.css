@@ -391,6 +391,66 @@
   }
 }
 
+/* --- Forced colours (Windows High Contrast and similar themes) -------------
+ * The browser replaces the colours of the page with the few of the player's
+ * theme and drops background images. The frames are drawn with backgrounds,
+ * so panels, cards and buttons would lose their edges, the bars their fill,
+ * and the tick of every option card would show, selected or not. These rules
+ * draw them again with system colours. */
+@media (forced-colors: active) {
+  .backdrop,
+  .frame__bg {
+    display: none;
+  }
+  .frame {
+    border: 1px solid CanvasText;
+  }
+  .btn {
+    border: 2px solid ButtonText;
+  }
+  .btn--primary,
+  .btn--launch {
+    border-width: 3px;
+  }
+  .btn[aria-disabled='true'],
+  .btn[data-disabled] {
+    border-color: GrayText;
+    color: GrayText;
+  }
+  .option[data-selected] {
+    outline: 3px solid Highlight;
+    outline-offset: -4px;
+  }
+  /* After the rule above, so a selected card still shows the focus ring. */
+  .option[data-focus-visible] {
+    outline: 3px solid CanvasText;
+    outline-offset: 4px;
+  }
+  .tick {
+    forced-color-adjust: none;
+    border-color: CanvasText;
+    background: Canvas;
+    color: Canvas;
+  }
+  .option[data-selected] .tick {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+  .bar {
+    forced-color-adjust: none;
+    border-color: CanvasText;
+    background: Canvas;
+  }
+  .bar__fill {
+    background: CanvasText;
+  }
+  /* The current planning step: its round number gets the selection colour. */
+  [aria-current='step'] > span:first-child {
+    border-color: Highlight;
+  }
+}
+
 .fade-in {
   animation: fade-in 320ms ease both;
 }

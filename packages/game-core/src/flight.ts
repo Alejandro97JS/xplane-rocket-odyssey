@@ -1,5 +1,7 @@
 import { FREE_EXPLORATION } from './exploration.ts';
 import {
+  agree,
+  crewOf,
   formatAltitude,
   formatDuration,
   formatList,
@@ -8,6 +10,7 @@ import {
   formatSpeed,
   formatUsd,
   lowerFirst,
+  upperFirst,
 } from './format.ts';
 import {
   circularSpeedMs,
@@ -596,12 +599,13 @@ export function buildFlight(evaluation: Evaluation): Flight {
       transferCoast.tStart +
       (transferCoast.tEnd - transferCoast.tStart) * climbTimeShare(beltAngleDeg / 180);
     if (evaluation.radiation.exposedCrew > 0) {
+      const exposed = evaluation.radiation.exposedCapsules.length;
       event(
         'radiation_belts',
         beltTime,
         'warning',
         'Radiation alarm',
-        'The capsule enters the Van Allen belts without shielding. The dose rate inside the cabin rises fast.',
+        `The ${agree(exposed, 'capsule enters', 'capsules enter')} the Van Allen belts without shielding. The dose rate inside the ${agree(exposed, 'cabin', 'cabins')} rises fast.`,
       );
     } else if (totals.crew > 0) {
       event(
@@ -715,7 +719,7 @@ export function buildFlight(evaluation: Evaluation): Flight {
       deployTime,
       'info',
       'Capsule separation',
-      `The ${payloadNames} flies free of the second stage. The crew reports all systems nominal.`,
+      `The ${payloadNames} ${agree(payloads.length, 'flies', 'fly')} free of the second stage. The crew reports all systems nominal.`,
     );
   } else if (rocket.payloadBay === 'internal') {
     event(
@@ -731,7 +735,7 @@ export function buildFlight(evaluation: Evaluation): Flight {
       deployTime,
       'info',
       'Payload deployed',
-      `The ${payloadNames} separates from the second stage and flies free.`,
+      `The ${payloadNames} ${agree(payloads.length, 'separates', 'separate')} from the second stage and ${agree(payloads.length, 'flies', 'fly')} free.`,
     );
   }
 
@@ -742,7 +746,7 @@ export function buildFlight(evaluation: Evaluation): Flight {
       verdictTime,
       'danger',
       'Medical alert',
-      `The crew of ${evaluation.radiation.exposedCrew} has absorbed a dangerous radiation dose in the Van Allen belts. Mission control orders an emergency return.`,
+      `${upperFirst(crewOf(evaluation.radiation.exposedCrew))} has absorbed a dangerous radiation dose in the Van Allen belts. Mission control orders an emergency return.`,
     );
     return finish(operations.tEnd, 'radiation');
   }

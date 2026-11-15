@@ -1,0 +1,3 @@
+# Text files use LF in the repository and in every checkout, Windows included,
+# so Prettier (which expects LF) passes wherever the repository is cloned.
+* text=auto eol=lf

@@ -1,6 +1,8 @@
 import { FREE_EXPLORATION } from './exploration.ts';
 import type { Flight } from './flight.ts';
 import {
+  agree,
+  crewOf,
   formatList,
   formatMass,
   formatPercent,
@@ -77,15 +79,15 @@ export function buildReport(evaluation: Evaluation, flight: Flight): MissionRepo
     }
 
     case 'radiation': {
-      const capsules = formatList(
-        evaluation.radiation.exposedCapsules.map((p) => lowerFirst(p.shortName)),
-      );
+      const { exposedCapsules, exposedCrew } = evaluation.radiation;
+      const capsules = formatList(exposedCapsules.map((p) => lowerFirst(p.shortName)));
+      const count = exposedCapsules.length;
       return {
         headline: 'Crew exposed to radiation',
-        summary: `The launch was flawless, but the crew of ${evaluation.radiation.exposedCrew} absorbed a dangerous radiation dose and the mission had to be aborted.`,
+        summary: `The launch was flawless, but ${crewOf(exposedCrew)} absorbed a dangerous radiation dose and the mission had to be aborted.`,
         explanation: [
           'The Earth is surrounded by the Van Allen belts: two rings of fast particles trapped by its magnetic field, starting about 1,000 km up. Low orbits stay below them.',
-          `To reach ${lowerFirst(orbit.shortName)} a spacecraft has to fly through the belts. The ${capsules} has life support but no radiation shielding, so its crew was exposed.`,
+          `To reach ${lowerFirst(orbit.shortName)} a spacecraft has to fly through the belts. The ${capsules} ${agree(count, 'has', 'have')} life support but no radiation shielding, so ${agree(count, 'its crew was', 'their crews were')} exposed.`,
           `The rocket itself was not the problem: it had ${formatSpeed(deltaV.marginMs)} of delta-v in reserve.`,
         ],
         hints,

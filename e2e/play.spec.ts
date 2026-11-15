@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import {
   chooseCheckbox,
   chooseRadio,
+  expectNoAccessibilityViolations,
   flyToDebrief,
   launch,
   LEVEL_1_WIN,
@@ -37,7 +38,11 @@ test.describe('use case 1: launch', () => {
     await page.getByRole('button', { name: 'Next mission' }).click();
     await expect(page.getByRole('radio', { name: /^Mission 2:/ })).toBeChecked();
     await expect(page.getByRole('radio', { name: /^Mission 1:/ })).not.toBeChecked();
-    await expect(page.getByText('Completed · 100')).toBeVisible();
+    await expect(page.getByText('Completed · best 100')).toBeVisible();
+    // Screen readers hear the record with the card.
+    await expect(page.getByRole('radio', { name: /^Mission 1:/ })).toHaveAccessibleDescription(
+      /Completed · best 100/,
+    );
     await next(page);
     await expect(page.getByRole('checkbox', { name: /CubeSat/ })).not.toBeChecked();
   });
@@ -173,6 +178,27 @@ test.describe('use case 1: launch', () => {
     await expect(page.getByText('Medical alert!', { exact: false })).toBeVisible();
     await page.getByRole('link', { name: 'Fix the design' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Orbit selection' })).toBeVisible();
+  });
+});
+
+test.describe('errors', () => {
+  test('a screen that cannot be loaded offers to reload the game', async ({ page }) => {
+    await planMission(page, LEVEL_1_WIN);
+    // As after a new deployment while the game is open: the old files of the
+    // launch screen, which is loaded on demand, are gone.
+    await page.route(/\/assets\/LaunchScreen-[^/]*\.js$/, (route) =>
+      route.fulfill({ status: 404, body: '' }),
+    );
+    await page.getByRole('button', { name: 'Launch!' }).click();
+
+    await expect(page.getByRole('heading', { level: 1, name: 'Lost contact' })).toBeFocused();
+    await expect(page).toHaveTitle('Lost contact · Rocket Odyssey');
+    await expect(page.getByRole('button', { name: 'Reload the game' })).toBeVisible();
+    await expect(page.getByRole('contentinfo')).toContainText('XPlane team');
+    await expectNoAccessibilityViolations(page);
+
+    await page.getByRole('link', { name: 'Back to the title screen', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Rocket Odyssey' })).toBeVisible();
   });
 });
 

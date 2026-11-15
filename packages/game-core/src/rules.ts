@@ -3,7 +3,7 @@ import { getOrbit, type OrbitSpec } from './catalog/orbits.ts';
 import { getPayload, type PayloadSpec } from './catalog/payloads.ts';
 import { getRocket, type RocketSpec } from './catalog/rockets.ts';
 import { computeTotals, type CompleteDesign, type DesignTotals } from './design.ts';
-import { formatList, formatMass, formatSpeed, formatUsd, lowerFirst } from './format.ts';
+import { agree, formatList, formatMass, formatSpeed, formatUsd, lowerFirst } from './format.ts';
 import { HINTS } from './hints.ts';
 import type { LevelId } from './ids.ts';
 import { computeDeltaV, type DeltaVBudget } from './physics.ts';
@@ -209,7 +209,8 @@ function radiationCheck(
   let detail: string;
   if (!passed) {
     const capsules = formatList(radiation.exposedCapsules.map((p) => lowerFirst(p.shortName)));
-    detail = `${orbit.shortName} is exposed to the Van Allen radiation belts and the ${capsules} has no shielding.`;
+    const has = agree(radiation.exposedCapsules.length, 'has', 'have');
+    detail = `${orbit.shortName} is exposed to the Van Allen radiation belts and the ${capsules} ${has} no shielding.`;
   } else if (totals.crew === 0) {
     detail = 'No crew on board, and the electronics of the payload are hardened against radiation.';
   } else if (!orbit.radiationHazard) {

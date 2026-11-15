@@ -16,6 +16,8 @@ Use case 1, the launch, is implemented end to end: a title screen, five planning
 | `/launch` | Launch | Watches the flight, with telemetry, a trajectory map and the mission events. Can pause, restart or skip. |
 | `/debrief` | Mission debrief | Reads what happened and why, the hint, the five rules with their result, the numbers and the score. |
 
+A screen that cannot be shown, for example because a new version was deployed while the game was open, is replaced by an error screen, "Lost contact", with a way to reload the game. It has no address of its own. Added on 2026-11-15; see [general_review.md](general_review.md).
+
 The player moves freely between the five steps with the stepper at the bottom of each one. The budget of the contract is in the header of every step. Every screen has its own address, so the back button of the browser works.
 
 Free exploration, added on 2026-11-14, uses the same screens with no contract and no budget. It is described in [free_exploration.md](free_exploration.md).
@@ -103,8 +105,9 @@ Checked on 2026-11-15 in Chrome, in free exploration, with a medium orbit, a geo
 
 | Command | What runs | Latest result |
 | --- | --- | --- |
-| `npm test` | 248 unit tests: tables against the use case, physics, one case per failure and per valid path, every flight ending, the shape of the climb to the apogee, the score and the optimal design of each level, free exploration, reducer, serialization, playback mapping, rocket drawings, the scores of the result music, server. | All pass on 2026-11-15, the last time after the "How to play" guide was added. |
-| `npm run test:e2e` | 36 Playwright tests in Chrome against the production build: gameplay, free exploration, the "How to play" guide, keyboard only, reduced motion, axe on every screen, reflow at 320 pixels, the result music, the sound button and the credits banner. | All pass on 2026-11-15, the last time after the "How to play" guide was added. |
+| `npm test` | 255 unit tests: tables against the use case, physics, one case per failure and per valid path, every flight ending, the shape of the climb to the apogee, the agreement of the texts with several payloads, the score and the optimal design of each level, free exploration, reducer, serialization, playback mapping, rocket drawings, the scores of the result music, server (caching and compression included). | All pass on 2026-11-15, the last time after the general review. |
+| `npm run test:e2e` | 38 Playwright tests in Chrome against the production build: gameplay, free exploration, the "How to play" guide, the error screen, keyboard only, reduced motion, forced colours, axe on every screen, reflow at 320 pixels, the result music, the sound button and the credits banner. | All pass on 2026-11-15, the last time after the general review. |
+| `npm run format:check` | Prettier over the repository. | Passes on 2026-11-15. Since then `.gitattributes` keeps LF line endings on Windows too; before, checkouts with CRLF made it fail. |
 | `npm run typecheck` | TypeScript strict in the three packages and the end-to-end tests. | No errors. |
 | `npm run lint` | ESLint with `typescript-eslint`, `jsx-a11y` and the rules of hooks. | No errors. |
 
@@ -129,9 +132,9 @@ The tests that try every design evaluate more than 100,000 designs each and take
 - **Deployed on 2026-11-14** at <https://rocket-odysseyserver-production.up.railway.app>, from commit `ad6dc78`. The two pushes before it had been skipped by the old watch paths. Railway sets `PORT` to 8080, and the public domain targets that port. The health check on `/health` passed. Over the public address, `/health`, `/`, the addresses of the screens, the favicon and the main script answer 200, and `/api/*` and missing files answer 404. Nobody has played the deployed game in a browser yet.
 - **`railway.json` is deprecated by Railway.** Asked to read it, the API answered: "Config as Code (railway.json / railway.toml) is deprecated. Use Infrastructure as Code (.railway/railway.ts) instead." The file stays in the repository because the standard names it, but Railway does not apply it to this service. The CLI adds that existing files keep working until 2026-12-01 and offers `railway config migrate`. Moving to `.railway/railway.ts` changes the standard and needs the owner's approval.
 - **Before the first deployment:** each deployment needs the confirmation of the owner, and the Railway session had expired. `main` is in step with `origin/main`, so a deployment from GitHub would get the current code. When the public domain is generated, its target port has to be the port the server prints in the deployment log: Railway sets `PORT` itself, and it may not be the 3000 of the `Dockerfile`.
-- **Two things to improve in the server, found on 2026-11-14, neither blocking:**
-  - `/` is answered by the static file handler, without `Cache-Control`. The other addresses of the game get `no-cache`. After a new deployment, a browser could keep an old page that asks for assets that no longer exist.
-  - Responses are not compressed. The largest script is 346 kB, and 105 kB with gzip.
+- **Two things to improve in the server, found on 2026-11-14, neither blocking. Both fixed on 2026-11-15** (see [general_review.md](general_review.md)):
+  - `/` was answered by the static file handler, without `Cache-Control`. The other addresses of the game got `no-cache`. After a new deployment, a browser could keep an old page that asks for assets that no longer exist. Every HTML answer now has `no-cache`, and a screen that still cannot be loaded shows an error screen with a way to reload.
+  - Responses were not compressed. They are now compressed with gzip for clients that accept it: the main script goes from 364 kB to 109 kB.
 - **The game cannot be shown inside a frame on another site.** The server sends `X-Frame-Options: SAMEORIGIN`. This is the default of the secure headers and only matters if the game has to be embedded somewhere.
 - **No screen reader has been used on the game.** The automated checks and the keyboard test pass, but a person has to do that pass.
 - **The owner has to judge whether the animation looks credible.**

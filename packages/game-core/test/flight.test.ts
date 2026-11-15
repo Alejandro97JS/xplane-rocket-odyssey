@@ -300,3 +300,60 @@ describe('simulate', () => {
     expect(run(SCENARIOS[7]!).report.headline).toBe('Stranded short of the target orbit');
   });
 });
+
+describe('the words of the flight and of the debrief', () => {
+  const texts = (result: SimulationResult): string[] => [
+    result.report.summary,
+    ...result.report.explanation,
+    ...result.evaluation.checks.map((check) => check.detail),
+    ...result.flight.events.map((event) => event.detail),
+  ];
+
+  it('agree in number with several payloads', () => {
+    const station = simulate(null, {
+      payloadIds: ['station_core', 'station_lab'],
+      orbitId: 'leo',
+      rocketId: 'falcon9',
+    });
+    expect(station.flight.events.find((e) => e.id === 'payload_deployed')?.detail).toBe(
+      'The core module and laboratory module separate from the second stage and fly free.',
+    );
+
+    const crews = simulate(null, {
+      payloadIds: ['capsule_suborbital', 'capsule_classic'],
+      orbitId: 'geo',
+      rocketId: 'starship',
+    });
+    expect(crews.failure).toBe('radiation');
+    const all = texts(crews).join(' ');
+    expect(all).toContain('the test capsule and classic capsule have no shielding');
+    expect(all).toContain('have life support but no radiation shielding, so their crews were');
+    expect(all).toContain('The capsules enter the Van Allen belts');
+    expect(all).toContain('The test capsule and classic capsule fly free');
+    expect(all).not.toMatch(/capsule (has|flies|enters)\b/);
+  });
+
+  it('agree in number with one payload', () => {
+    const single = simulate('first_space_data', {
+      payloadIds: ['cubesat'],
+      orbitId: 'leo',
+      rocketId: 'electron',
+    });
+    expect(single.flight.events.find((e) => e.id === 'payload_deployed')?.detail).toBe(
+      'The scientific CubeSat separates from the second stage and flies free.',
+    );
+  });
+
+  it('call a crew of one an astronaut', () => {
+    const result = simulate('human_horizon', {
+      payloadIds: ['capsule_suborbital'],
+      orbitId: 'meo',
+      rocketId: 'falcon9',
+    });
+    expect(result.report.summary).toContain('but the astronaut absorbed');
+    expect(texts(result).join(' ')).not.toContain('crew of 1');
+    expect(result.flight.events.find((e) => e.id === 'radiation_alert')?.detail).toMatch(
+      /^The astronaut has absorbed/,
+    );
+  });
+});

@@ -23,6 +23,8 @@ The target is WCAG 2.1 AA. This document records what was done to meet it, what 
 | Target size | Buttons, step links and "Change" links are at least 44 pixels high. |
 | Status messages (4.1.3) | The over-budget alert is an alert region. Totals, readiness and the verdict of the flight are status regions. |
 | Language | `lang="en"` on the page. All text is in English. |
+| Forced colours (Windows High Contrast) | Since 2026-11-15, rules for `@media (forced-colors: active)` keep the edges of frames, cards and buttons, the outline and the tick of the chosen card, the fill of the bars and the current step, with the colours of the player's theme. Before, every option card showed its tick, chosen or not. See [general_review.md](general_review.md). |
+| A screen that cannot load | Since 2026-11-15, an error screen in the shared layout, with its own `<h1>` and title, says what happened and offers to reload the game or go back to the title screen. |
 
 ## What the automated checks cover
 
@@ -31,6 +33,8 @@ The target is WCAG 2.1 AA. This document records what was done to meet it, what 
 Since 2026-11-14 the run also checks that the debrief has its sound button in the header, and that the button mutes the launch too.
 
 Since 2026-11-15 it also covers the "How to play" guide: axe on it, the guide at 320 pixels with axe and the check for sideways scrolling, and a test that opens it from the title screen, follows an entry of its contents and leaves it for step 1 with the keyboard alone.
+
+Since 2026-11-15 it also runs axe on the error screen, checks that the record of a completed mission is part of the description of its card, and checks in forced colours that only the chosen card shows its tick and that the budget bar keeps its fill.
 
 The same run plays the level with the keyboard alone, enters free exploration with the keyboard from step 1 and moves between it and the contracts with the arrow keys, checks the dialog focus trap and checks reflow at 320 pixels on every screen. The decisions about the accessibility of free exploration are in [free_exploration.md](free_exploration.md).
 
@@ -43,6 +47,7 @@ Automated checks find only part of the problems.
 - A pass with a screen reader (NVDA or VoiceOver) over the whole level, listening to how the option cards, the event log and the debrief read.
 - Contrast of text over gradients, which axe cannot measure. The gradients used are all darker than the panel fill the colours were chosen against.
 - Zoom to 200% and text spacing overrides.
+- Windows High Contrast itself, with a dark and a light theme. Forced colours were only seen through the emulation of Chrome.
 - Whether the animation is comfortable to watch, for people who do not set reduced motion.
 
 ## Two deliberate exceptions to the lint rules
