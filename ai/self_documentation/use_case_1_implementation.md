@@ -29,7 +29,7 @@ packages/game-core/src
   catalog/               The four tables of the use case, as data
   design.ts              What the player has chosen; totals of mass, cost and crew
   exploration.ts         Texts of free exploration, the mode with no contract and no budget
-  physics.ts             Rocket equation per stage; orbital speeds and periods
+  physics.ts             Rocket equation per stage; orbital speeds and periods; the orbit equation
   rules.ts               evaluateMission: the five rules applied to a design
   flight.ts              buildFlight: events, phases and telemetry of the flight
   report.ts              buildReport: the written explanation
@@ -78,12 +78,32 @@ e2e/                     Playwright tests: gameplay, keyboard, accessibility
 
 How the altitude and speed curves are produced: during the climb they follow the delta-v delivered so far, with the share lost to gravity and air removed, so the speed equals the orbital speed exactly at insertion. During a transfer they follow the orbit equation. They are meant to look credible, as the standards ask, not to be a trajectory integration.
 
+### The climb to the apogee and the trajectory map
+
+The trajectory map joins the telemetry samples with straight lines, and its altitude scale is logarithmic, so the low altitudes take most of the room. Until 2026-11-15 this drew a straight line across the path, just after the transfer burn, for two reasons:
+
+- The 40 samples of the coast to the apogee were evenly spread in time. The vehicle is fastest at the perigee, so on the way to a medium orbit the first sample was already at 1,034 km, against 216 km at the engine cutoff, and 10.6° further round. On the map, which is 240 units wide, that one step was 15 units long and pointed almost straight away from the Earth.
+- The altitude was a power curve of the time that started climbing at full rate. The path therefore left the parking orbit with a corner instead of leaving it level, as an orbit does.
+
+A vehicle stranded during the transfer burn had the same fault, with 12 samples.
+
+Both coasts are now one function, `climbToApogee` in `flight.ts`:
+
+- The altitude follows the orbit equation as a function of the angle turned since the perigee (`ellipticalAltitudeKm` in `physics.ts`). The path leaves the perigee and reaches the apogee level.
+- The 40 samples are evenly spread along the half lap, 4.5° each, not in time.
+- The time at which each angle is reached is the same law as before, so the Earth turns in the animation as it did. It is not Kepler's law: with it, on the way to a geostationary orbit, the vehicle would turn the first quarter of the lap in half a second on screen, instead of a second and a half.
+- The radiation belts event is still fired at 3,000 km, now found with the orbit equation (`ellipticalAngleDeg`). The vehicle now gains height more slowly at first, so the event comes later: on the way to a geostationary orbit, 1.2 seconds into the 6 seconds the coast takes on screen, instead of 0.3.
+
+What changed for a stranded vehicle: it now turns half a lap up to its low apogee, instead of a quarter, and takes half the period of that orbit, instead of a fixed 1,500 seconds. On screen the phase still lasts 5 seconds.
+
+Checked on 2026-11-15 in Chrome, in free exploration, with a medium orbit, a geostationary orbit and a vehicle stranded during the transfer burn: the path is a curve in the three. Measured from the flight data with the projection of the map, the sharpest corner of the path once in orbit is now 10.8°, between the samples of the parking orbit, which were not changed and look round. The coast to the apogee has no corner above 6.4°, and none where one phase meets the next.
+
 ## Tests
 
-| Command | What runs | Result on 2026-11-14 |
+| Command | What runs | Latest result |
 | --- | --- | --- |
-| `npm test` | 241 unit tests: tables against the use case, physics, one case per failure and per valid path, every flight ending, the score and the optimal design of each level, free exploration, reducer, serialization, playback mapping, rocket drawings, the scores of the result music, server. | All pass on 2026-11-14, after the result music was added. |
-| `npm run test:e2e` | 28 Playwright tests in Chrome against the production build: gameplay, free exploration, keyboard only, reduced motion, axe on every screen, reflow at 320 pixels, the result music and the sound button. | All pass on 2026-11-14, after the result music was added. |
+| `npm test` | 247 unit tests: tables against the use case, physics, one case per failure and per valid path, every flight ending, the shape of the climb to the apogee, the score and the optimal design of each level, free exploration, reducer, serialization, playback mapping, rocket drawings, the scores of the result music, server. | All pass on 2026-11-15, after the climb to the apogee was changed. |
+| `npm run test:e2e` | 28 Playwright tests in Chrome against the production build: gameplay, free exploration, keyboard only, reduced motion, axe on every screen, reflow at 320 pixels, the result music and the sound button. | All pass on 2026-11-15, after the climb to the apogee was changed. |
 | `npm run typecheck` | TypeScript strict in the three packages and the end-to-end tests. | No errors. |
 | `npm run lint` | ESLint with `typescript-eslint`, `jsx-a11y` and the rules of hooks. | No errors. |
 

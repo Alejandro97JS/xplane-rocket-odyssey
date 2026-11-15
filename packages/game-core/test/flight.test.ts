@@ -4,6 +4,7 @@ import {
   type CompleteDesign,
   type FlightEnding,
   type FlightEventId,
+  type FlightPhaseId,
   type LevelId,
   type SimulationResult,
 } from '../src/index.ts';
@@ -208,6 +209,39 @@ describe('simulate', () => {
     const last = result.flight.telemetry.at(-1)!;
     expect(last.altitudeKm).toBeCloseTo(35_786, 6);
     expect(last.velocityMs).toBeCloseTo(3_075, -1);
+  });
+
+  it.each<[string, Scenario, FlightPhaseId]>([
+    ['to geostationary altitude', SCENARIOS[1]!, 'transfer_coast'],
+    ['to the top of a high elliptical orbit', SCENARIOS[2]!, 'transfer_coast'],
+    ['of a vehicle stranded during the transfer burn', SCENARIOS[6]!, 'stranded'],
+  ])('draws the climb to the apogee as a curve: %s', (_name, scenario, phaseId) => {
+    const { flight } = run(scenario);
+    const phase = flight.phases.find((p) => p.id === phaseId)!;
+    // The sample at the start of the phase is the engine cutoff, at the perigee.
+    const climb = flight.telemetry.filter((s) => s.t >= phase.tStart && s.t <= phase.tEnd);
+    const perigee = climb[0]!;
+    const apogee = climb.at(-1)!;
+
+    // Half a lap, in steps short enough to be drawn as a curve.
+    expect(apogee.downrangeDeg - perigee.downrangeDeg).toBeCloseTo(180, 6);
+    for (let i = 1; i < climb.length; i++) {
+      expect(climb[i]!.downrangeDeg - climb[i - 1]!.downrangeDeg).toBeLessThanOrEqual(5);
+      expect(climb[i]!.altitudeKm).toBeGreaterThanOrEqual(climb[i - 1]!.altitudeKm);
+    }
+    // The path leaves the perigee level. A first step that is already far
+    // up is drawn as a straight line that cuts across the curve.
+    const firstStepKm = climb[1]!.altitudeKm - perigee.altitudeKm;
+    expect(firstStepKm).toBeLessThan(0.01 * (apogee.altitudeKm - perigee.altitudeKm));
+  });
+
+  it('reports the radiation belts when the climb reaches them', () => {
+    const { flight } = run(SCENARIOS[1]!);
+    const belts = flight.events.find((e) => e.id === 'radiation_belts')!;
+    const after = flight.telemetry.findIndex((s) => s.t >= belts.t);
+    // The densest part of the inner belt is at 3,000 km.
+    expect(flight.telemetry[after - 1]!.altitudeKm).toBeLessThanOrEqual(3_000);
+    expect(flight.telemetry[after]!.altitudeKm).toBeGreaterThanOrEqual(3_000);
   });
 
   it('leaves a high elliptical orbit without circularising', () => {

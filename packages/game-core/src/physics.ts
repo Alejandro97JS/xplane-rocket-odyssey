@@ -64,6 +64,44 @@ export function ellipticalSpeedMs(
   return Math.sqrt(EARTH_MU * (2 / r - 1 / semiMajorAxisKm)) * 1000;
 }
 
+/**
+ * Orbit equation: altitude after turning `angleDeg` around the Earth since
+ * the perigee, on an orbit with the given extremes. The perigee is at 0° and
+ * the apogee at 180°. The path is level at both, so it leaves a circular
+ * orbit and arrives at another one without a corner.
+ */
+export function ellipticalAltitudeKm(
+  angleDeg: number,
+  perigeeAltitudeKm: number,
+  apogeeAltitudeKm: number,
+): number {
+  const perigeeKm = EARTH_RADIUS_KM + perigeeAltitudeKm;
+  const apogeeKm = EARTH_RADIUS_KM + apogeeAltitudeKm;
+  const cosine = Math.cos((angleDeg * Math.PI) / 180);
+  const radiusKm =
+    (2 * perigeeKm * apogeeKm) / (apogeeKm + perigeeKm + (apogeeKm - perigeeKm) * cosine);
+  return radiusKm - EARTH_RADIUS_KM;
+}
+
+/**
+ * The orbit equation the other way round: angle turned since the perigee
+ * when the climb to the apogee reaches `altitudeKm`, from 0° to 180°.
+ */
+export function ellipticalAngleDeg(
+  altitudeKm: number,
+  perigeeAltitudeKm: number,
+  apogeeAltitudeKm: number,
+): number {
+  const perigeeKm = EARTH_RADIUS_KM + perigeeAltitudeKm;
+  const apogeeKm = EARTH_RADIUS_KM + apogeeAltitudeKm;
+  // A circular orbit has the same altitude at every angle.
+  if (apogeeKm === perigeeKm) return 0;
+  const radiusKm = EARTH_RADIUS_KM + altitudeKm;
+  const cosine =
+    ((2 * perigeeKm * apogeeKm) / radiusKm - (apogeeKm + perigeeKm)) / (apogeeKm - perigeeKm);
+  return (Math.acos(Math.min(1, Math.max(-1, cosine))) * 180) / Math.PI;
+}
+
 /** Time to go from perigee to apogee: half the orbital period, in seconds. */
 export function halfPeriodS(perigeeAltitudeKm: number, apogeeAltitudeKm: number): number {
   const semiMajorAxisKm = EARTH_RADIUS_KM + (perigeeAltitudeKm + apogeeAltitudeKm) / 2;

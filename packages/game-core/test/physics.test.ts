@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   circularSpeedMs,
   computeDeltaV,
+  ellipticalAltitudeKm,
+  ellipticalAngleDeg,
   ellipticalSpeedMs,
   G0,
   getOrbit,
@@ -75,6 +77,33 @@ describe('orbital mechanics helpers', () => {
     expect(ellipticalSpeedMs(35_786, 200, 35_786)).toBeCloseTo(1_600, -2);
     // A circular orbit is the special case with equal extremes.
     expect(ellipticalSpeedMs(400, 400, 400)).toBeCloseTo(circularSpeedMs(400), 6);
+  });
+
+  it('follows the orbit equation from perigee to apogee', () => {
+    // Geostationary transfer orbit from a 200 km parking orbit.
+    expect(ellipticalAltitudeKm(0, 200, 35_786)).toBeCloseTo(200, 6);
+    expect(ellipticalAltitudeKm(180, 200, 35_786)).toBeCloseTo(35_786, 6);
+    // A quarter of a lap after the perigee: 2 · 6,571 · 42,157 / 48,728 km from the centre.
+    expect(ellipticalAltitudeKm(90, 200, 35_786)).toBeCloseTo(4_999, 0);
+    // The path is level at both ends: one degree changes the altitude by
+    // less than a thousandth of the climb.
+    expect(ellipticalAltitudeKm(1, 200, 35_786) - 200).toBeLessThan(35.586);
+    expect(35_786 - ellipticalAltitudeKm(179, 200, 35_786)).toBeLessThan(35.586);
+    // A circular orbit is the special case with equal extremes.
+    expect(ellipticalAltitudeKm(77, 400, 400)).toBeCloseTo(400, 6);
+  });
+
+  it('finds the angle at which a climb reaches an altitude', () => {
+    expect(ellipticalAngleDeg(200, 200, 35_786)).toBeCloseTo(0, 6);
+    expect(ellipticalAngleDeg(35_786, 200, 35_786)).toBeCloseTo(180, 6);
+    for (const angle of [10, 73, 90, 150]) {
+      const altitude = ellipticalAltitudeKm(angle, 200, 35_786);
+      expect(ellipticalAngleDeg(altitude, 200, 35_786)).toBeCloseTo(angle, 6);
+    }
+    // Altitudes outside the orbit give its nearest end.
+    expect(ellipticalAngleDeg(100, 200, 35_786)).toBe(0);
+    expect(ellipticalAngleDeg(50_000, 200, 35_786)).toBe(180);
+    expect(ellipticalAngleDeg(400, 400, 400)).toBe(0);
   });
 
   it('computes the coast time to apogee', () => {

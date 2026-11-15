@@ -9,7 +9,14 @@ import {
   formatUsd,
   lowerFirst,
 } from './format.ts';
-import { circularSpeedMs, ellipticalSpeedMs, G0, halfPeriodS } from './physics.ts';
+import {
+  circularSpeedMs,
+  ellipticalAltitudeKm,
+  ellipticalAngleDeg,
+  ellipticalSpeedMs,
+  G0,
+  halfPeriodS,
+} from './physics.ts';
 import type { Evaluation } from './rules.ts';
 
 export type EventTone = 'info' | 'success' | 'warning' | 'danger';
@@ -368,6 +375,39 @@ export function buildFlight(evaluation: Evaluation): Flight {
     return { tStart, tEnd: clock };
   };
 
+  /**
+   * Share of the time of a climb to the apogee spent when a share of the
+   * half lap has been turned: fast at the bottom, slow at the top.
+   */
+  const climbTimeShare = (turnShare: number) => 1 - (1 - turnShare) ** (1 / 2.4);
+
+  /**
+   * Coasts half a lap with the engines off, from the perigee where they cut
+   * off up to the apogee. The altitude follows the orbit equation, so the
+   * path leaves the perigee and reaches the apogee without a corner.
+   *
+   * The samples are spread evenly along the half lap, not in time. Spread in
+   * time, the first one is already hundreds of kilometres up, because the
+   * vehicle is fastest at the perigee, and whatever draws the path joins it
+   * to the perigee with a long straight line.
+   */
+  const climbToApogee = (apogeeAltitudeKm: number) => {
+    const perigeeAltitudeKm = altitudeKm;
+    const startAngle = downrangeDeg;
+    const duration = halfPeriodS(insertionAltitudeKm, apogeeAltitudeKm);
+    const tStart = clock;
+    const STEPS = 40;
+    for (let i = 1; i <= STEPS; i++) {
+      const turnShare = i / STEPS;
+      altitudeKm = ellipticalAltitudeKm(180 * turnShare, perigeeAltitudeKm, apogeeAltitudeKm);
+      velocityMs = ellipticalSpeedMs(altitudeKm, insertionAltitudeKm, apogeeAltitudeKm);
+      downrangeDeg = startAngle + 180 * turnShare;
+      sample(tStart + duration * climbTimeShare(turnShare), 0);
+    }
+    clock = tStart + duration;
+    return { tStart, tEnd: clock };
+  };
+
   const insertion = burn(insertionDeltaV, (_fraction, nowMs) => ascentTo(nowMs));
   phase('insertion_burn', 'Second stage burn', insertion.tStart, insertion.tEnd);
 
@@ -521,13 +561,8 @@ export function buildFlight(evaluation: Evaluation): Flight {
         'Propellant depleted',
         `The ${lowerFirst(stage2.name)} runs dry in the middle of the transfer burn, ${formatSpeed(injection.shortMs)} of delta-v before its end.`,
       );
-      const startAltitudeKm = altitudeKm;
-      const startAngle = downrangeDeg;
-      const drift = coast(1_500, 12, (x) => {
-        altitudeKm = startAltitudeKm + (reachedApogeeKm - startAltitudeKm) * (1 - (1 - x) ** 1.7);
-        velocityMs = ellipticalSpeedMs(altitudeKm, insertionAltitudeKm, reachedApogeeKm);
-        downrangeDeg = startAngle + 90 * x;
-      });
+      // The vehicle still climbs to an apogee, only a much lower one.
+      const drift = climbToApogee(reachedApogeeKm);
       phase('stranded', 'Stranded', drift.tStart, drift.tEnd);
       event(
         'stranded',
@@ -547,25 +582,19 @@ export function buildFlight(evaluation: Evaluation): Flight {
       `Engine cutoff. The vehicle now coasts uphill to ${formatAltitude(transfer.apogeeAltitudeKm)}, trading speed for height. The climb takes ${formatDuration(halfPeriodS(insertionAltitudeKm, transfer.apogeeAltitudeKm))}.`,
     );
 
-    // Coast from perigee to apogee: fast at the bottom, slow at the top.
-    const CLIMB_EXPONENT = 1.7;
     const climbSpan = transfer.apogeeAltitudeKm - insertionAltitudeKm;
-    const transferStartAngle = downrangeDeg;
-    const transferCoast = coast(
-      halfPeriodS(insertionAltitudeKm, transfer.apogeeAltitudeKm),
-      40,
-      (x) => {
-        altitudeKm = insertionAltitudeKm + climbSpan * (1 - (1 - x) ** CLIMB_EXPONENT);
-        velocityMs = ellipticalSpeedMs(altitudeKm, insertionAltitudeKm, transfer.apogeeAltitudeKm);
-        downrangeDeg = transferStartAngle + 180 * (1 - (1 - x) ** 2.4);
-      },
-    );
+    const cutoffAltitudeKm = altitudeKm;
+    const transferCoast = climbToApogee(transfer.apogeeAltitudeKm);
     phase('transfer_coast', 'Coast to apogee', transferCoast.tStart, transferCoast.tEnd);
 
-    const beltFraction =
-      1 - (1 - (INNER_BELT_ALTITUDE_KM - insertionAltitudeKm) / climbSpan) ** (1 / CLIMB_EXPONENT);
+    const beltAngleDeg = ellipticalAngleDeg(
+      INNER_BELT_ALTITUDE_KM,
+      cutoffAltitudeKm,
+      transfer.apogeeAltitudeKm,
+    );
     const beltTime =
-      transferCoast.tStart + (transferCoast.tEnd - transferCoast.tStart) * beltFraction;
+      transferCoast.tStart +
+      (transferCoast.tEnd - transferCoast.tStart) * climbTimeShare(beltAngleDeg / 180);
     if (evaluation.radiation.exposedCrew > 0) {
       event(
         'radiation_belts',
